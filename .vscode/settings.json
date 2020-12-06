@@ -1,0 +1,44 @@
+{
+    "python.pythonPath": "venv/bin/python3.6",
+
+    "python.formatting.provider": "yapf",
+    "python.formatting.yapfPath": "venv/bin/yapf",
+    "python.formatting.yapfArgs": [
+        "--style",
+        "{based_on_style: facebook, column_limit: 120}",
+    ],
+
+    "python.linting.enabled": true,
+    "python.linting.lintOnSave": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintArgs": [
+        "--load-plugins", "pylint_django",
+        "--init-hook", "import sys; sys.path.append('.')",
+        "--variable-rgx=[a-z_]+",
+        "--max-line-length=120",
+        "--disable=abstract-method",
+        "--disable=imported-auth-user",
+        "--disable=inconsistent-return-statements",
+        "--disable=missing-docstring",
+        "--disable=no-self-use",
+        "--disable=protected-access",
+        "--disable=too-many-branches",
+        "--disable=too-many-locals",
+        "--disable=too-many-return-statements",
+        "--disable=too-many-statements",
+        "--disable=unused-argument"
+    ],
+    "python.linting.pylintPath": "venv/bin/pylint",
+    "python.linting.pylintUseMinimalCheckers": false,
+
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true,
+    },
+
+    "files.trimTrailingWhitespace": true,
+    "files.trimFinalNewlines": true,
+    "files.insertFinalNewline": true,
+    "[python]": {
+        "editor.formatOnSave": true
+    }
+}
