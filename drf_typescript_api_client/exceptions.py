@@ -1,0 +1,2 @@
+class DRFTypeScriptAPIClientException(Exception):
+    pass
