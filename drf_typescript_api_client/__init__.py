@@ -1,7 +1,7 @@
 import inspect
 import logging
 import re
-from typing import Callable, Optional, Tuple, Type
+from typing import Any, Callable, Optional, Tuple, Type
 
 from django.urls import reverse
 
@@ -10,6 +10,7 @@ from rest_framework.response import Response
 
 from .mappings import mappings
 from .exceptions import DRFTypeScriptAPIClientException
+from .url_finder import URLFinder
 
 _logger = logging.getLogger(f"drf-typescript-api-client.{__name__}")
 
@@ -42,8 +43,9 @@ class TypeScriptEndpointDefinition:
         self.response_serializer = response_serializer
 
 
-def tsapiclient(
+def ts_api_client(
     path: Tuple[str, ...],
+    urlpatterns_module: Any = None,
     query_serializer: Optional[Type[serializers.Serializer]] = None,
     request_serializer: Optional[Type[serializers.Serializer]] = None,
     response_serializer: Optional[Type[serializers.Serializer]] = None
@@ -65,6 +67,7 @@ def tsapiclient(
             mappings=__view_mappings,
             path=path,
             view=view,
+            urlpatterns_module=urlpatterns_module,
             query_serializer=query_serializer,
             request_serializer=request_serializer,
             response_serializer=response_serializer
@@ -76,6 +79,7 @@ def tsapiclient(
 
 def _update_view_mappings(
     mappings: dict, path: Tuple[str, ...], view: Callable[..., Type[Response]],
+    urlpatterns_module: Any,
     query_serializer: Optional[Type[serializers.Serializer]],
     request_serializer: Optional[Type[serializers.Serializer]],
     response_serializer: Optional[Type[serializers.Serializer]]
@@ -93,9 +97,9 @@ def _update_view_mappings(
         else:
             mappings[path[0]] = TypeScriptEndpointDefinition(
                 # url=reverse(view),
-                url="/api/v1/test",
-                args=[key for key in inspect.signature(
-                    view).parameters.keys() if key not in ('self', 'request', )],
+                url="/api/v1/test" if urlpatterns_module is None else URLFinder(
+                    view, urlpatterns_module),
+                args=inspect.signature(view).parameters,
                 method="GET",
                 query_serializer=query_serializer,
                 request_serializer=request_serializer,
@@ -186,10 +190,10 @@ def _get_ts_endpoint_text(key, value, indent):
             text += _get_ts_endpoint_text(_key, _value, indent + 2)
         text += "\n" + ("  " * indent) + "},"
     else:
-        args = ",".join([(arg + ": string") for arg in value.args])
         text += " (\n" + str("  " * (indent + 2)) \
-            + (",\n" + str("  " * (indent + 2))).join([(arg + ": string") for arg in value.args]) \
-            + ((",\n" + str("  " * (indent + 2))) if args != "" else "") \
+            + (",\n" + str("  " * (indent + 2))).join([(k + ": string" + (" | null" if v.default is None else ""))
+                                                       for k, v in value.args.items() if k not in ('self', 'request')]) \
+            + ((",\n" + str("  " * (indent + 2))) if len([k for k in value.args.keys() if k not in ('self', 'request')]) > 0 else "") \
             + "params: {\n" \
             + ("" if not value.query_serializer else str("  " * (indent + 4)) + "queryParams?: { foo: any }," + "\n") \
             + ("" if not value.request_serializer else str("  " * (indent + 4)) + "data?: { foo: any }" + "\n") \
