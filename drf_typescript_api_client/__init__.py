@@ -3,14 +3,14 @@ import logging
 import re
 from typing import Any, Callable, Optional, Tuple, Type
 
-from django.urls import reverse
+from django.conf import settings
+from django.urls import reverse, include
 
 from rest_framework import serializers
 from rest_framework.response import Response
 
 from .mappings import mappings
 from .exceptions import DRFTypeScriptAPIClientException
-from .url_finder import URLFinder
 
 _logger = logging.getLogger(f"drf-typescript-api-client.{__name__}")
 
@@ -45,7 +45,8 @@ class TypeScriptEndpointDefinition:
 
 def ts_api_client(
     path: Tuple[str, ...],
-    urlpatterns_module: Any = None,
+    urlconf: Any = None,
+    url: Optional[str] = None,
     query_serializer: Optional[Type[serializers.Serializer]] = None,
     request_serializer: Optional[Type[serializers.Serializer]] = None,
     response_serializer: Optional[Type[serializers.Serializer]] = None
@@ -67,7 +68,8 @@ def ts_api_client(
             mappings=__view_mappings,
             path=path,
             view=view,
-            urlpatterns_module=urlpatterns_module,
+            urlconf=urlconf,
+            url=url,
             query_serializer=query_serializer,
             request_serializer=request_serializer,
             response_serializer=response_serializer
@@ -79,26 +81,33 @@ def ts_api_client(
 
 def _update_view_mappings(
     mappings: dict, path: Tuple[str, ...], view: Callable[..., Type[Response]],
-    urlpatterns_module: Any,
-    query_serializer: Optional[Type[serializers.Serializer]],
-    request_serializer: Optional[Type[serializers.Serializer]],
-    response_serializer: Optional[Type[serializers.Serializer]]
+    urlconf: Any = None,
+    url: Optional[str] = None,
+    query_serializer: Optional[Type[serializers.Serializer]] = None,
+    request_serializer: Optional[Type[serializers.Serializer]] = None,
+    response_serializer: Optional[Type[serializers.Serializer]] = None
 ) -> dict:
+    _logger.debug("Getting mapping for " + path[0])
     if path[0] not in mappings:
         if len(path) > 1:
             mappings[path[0]] = _update_view_mappings(
                 mappings=dict(),
                 path=path[1:],
                 view=view,
+                urlconf=urlconf,
+                url=url,
                 query_serializer=query_serializer,
                 request_serializer=request_serializer,
                 response_serializer=response_serializer
             )
         else:
+            # _urlconf = include(urlconf)[0] if urlconf is not None else (None if not hasattr(
+            #     settings, 'DRF_TYPESCRIPT_API_CLIENT') or "DEFAULT_URLCONF" not in settings.DRF_TYPESCRIPT_API_CLIENT else include(settings.DRF_TYPESCRIPT_API_CLIENT['DEFAULT_URLCONF'])[0])
+            # if _urlconf is None:
+            #     raise DRFTypeScriptAPIClientException(
+            #         "Either the `urlconf` argument or `DEFAULT_URLCONF` setting must be provided.")
             mappings[path[0]] = TypeScriptEndpointDefinition(
-                # url=reverse(view),
-                url="/api/v1/test" if urlpatterns_module is None else URLFinder(
-                    view, urlpatterns_module),
+                url=url,  # reverse(view, _urlconf),
                 args=inspect.signature(view).parameters,
                 method="GET",
                 query_serializer=query_serializer,
@@ -112,23 +121,23 @@ def _update_view_mappings(
             mappings=mappings[path[0]],
             path=path[1:],
             view=view,
+            urlconf=urlconf,
+            url=url,
             query_serializer=query_serializer,
             request_serializer=request_serializer,
             response_serializer=response_serializer
         )
     else:
-        print(mappings[path[0]])
         raise DRFTypeScriptAPIClientException("An unknown error occurred")
     return mappings
 
 
 def _get_serializer_definition(serializer: Type[serializers.Serializer]) -> str:
     _serializer = serializer
-    print(dir(_serializer))
     if isinstance(_serializer, serializers.ListSerializer):
-        print("FOUDN LIST SERIALIZER: ", str(_serializer))
+        # print("FOUDN LIST SERIALIZER: ", str(_serializer))
         _serializer = _serializer.child
-        print("LIST SERIALIZER CHILD: ", str(_serializer))
+        # print("LIST SERIALIZER CHILD: ", str(_serializer))
 
     if not isinstance(_serializer, serializers.Serializer):
         _serializer = _serializer()
@@ -204,15 +213,15 @@ def _get_ts_endpoint_text(key, value, indent):
             + str("  " * (indent + 4)) + "onError?(error: any): void\n" \
             + str("  " * (indent + 2)) + "},\n" \
             + str("  " * indent) + ") : void => {\n" \
-            + str("  " * (indent + 2)) + 'fetch("/api/v1/test", {\n' \
+            + str("  " * (indent + 2)) + 'fetch("' + (value.url or "") + '", {\n' \
             + str("  " * (indent + 4)) + 'method: "GET",\n' \
             + ("" if not value.request_serializer else str("  " * (indent + 4)) + 'body: params.data,\n') \
-            + str("  " * (indent + 4)) + "...params.options,\n" \
+            + str("  " * (indent + 4)) + "...params.options, \n" \
             + str("  " * (indent + 2)) + "})\n" \
             + str("  " * (indent + 4)) + ".then((response) => response.json())\n" \
-            + str("  " * (indent + 4)) + ".then((result) => params.onSuccess && params.onSuccess(result))\n" \
-            + str("  " * (indent + 4)) + ".catch((error) => params.onError && params.onError(error));\n" \
-            + str("  " * indent) + "},"
+            + str("  " * (indent + 4)) + ".then((result) => params.onSuccess & params.onSuccess(result))\n" \
+            + str("  " * (indent + 4)) + ".catch((error) => params.onError & params.onError(error)); \n" \
+            + str("  " * indent) + "}, "
     return text
 
 
@@ -227,8 +236,6 @@ def _get_api_client(api_name: str, handler: Optional[Callable[[str], str]]) -> s
         raise DRFTypeScriptAPIClientException(
             "`class_name` must not begin with a number.")
 
-    print(__view_mappings)
-    body = str(__view_mappings)
     content = ""
     sep = ""
     for key, value in __view_mappings.items():
@@ -252,7 +259,8 @@ def generate_api_client(
 
     Ex:
     comment='// this is a comment'
-    generate_api_client(output_path='/path/to/api.ts', api_name='MyAPIClass', handler=lambda docs: comment + '\\n\\n' + docs)
+    generate_api_client(output_path='/path/to/api.ts', api_name='MyAPIClass',
+                        handler=lambda docs: comment + '\\n\\n' + docs)
     """
     with open(output_path, 'w') as output_file:
         api_client_text = _get_api_client(api_name=api_name, handler=handler)
