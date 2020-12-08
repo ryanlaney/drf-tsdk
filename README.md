@@ -5,7 +5,7 @@ _A package to generate a TypeScript API client for [Django Rest Framework](https
 ### Usage:
 
 Install the package.
-`pip install git://`
+`pip install git+https://github.com/ryanlaney/drf-typescript-api-client.git`
 
 Add the `@ts_api_client()` decorator above any view that should be included in your TypeScript API client.
 
