@@ -7,17 +7,22 @@ from .common import SuccessSerializer
 
 
 class FooQuerySerializer(serializers.Serializer):
-    user = serializers.UUIDField(required=True)
+    user = serializers.UUIDField(
+        required=True, help_text="Description of `user`")
     from_ = serializers.DateField(required=False)
     to = serializers.DateField(required=False)
-    archived = serializers.BooleanField(required=False)
+    archived = serializers.BooleanField(
+        required=False, help_text="Description of `archived`")
 
 
 class FooSerializer(serializers.Serializer):
-    x = serializers.CharField()
-    y = serializers.DecimalField(
+    x1 = serializers.CharField(help_text="This is some help text for `x`")
+    x2 = serializers.DecimalField(
         max_digits=12, decimal_places=2, allow_null=True)
-    z = serializers.DateTimeField(allow_null=True, read_only=True)
+    x3 = serializers.DateTimeField(allow_null=True, read_only=True)
+    x4 = serializers.ListField(child=serializers.CharField())
+    x5 = serializers.DictField()
+    x6 = serializers.JSONField(write_only=True)
 
 
 class FooView(ViewSet):

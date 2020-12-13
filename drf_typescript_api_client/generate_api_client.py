@@ -29,8 +29,8 @@ def _get_ts_endpoint_text(key, value) -> str:
                             for k, v in value.args.items() if k not in ('self', 'request')]) \
             + ((",\n") if len([k for k in value.args.keys() if k not in ('self', 'request')]) > 0 else "") \
             + "params: {\n" \
-            + ("" if not value.query_serializer else "queryParams?: " + value.query_serializer.ts_definition_string() + ",\n") \
-            + ("" if not value.request_serializer else "data?: " + value.response_serializer.ts_definition_string() + "\n") \
+            + ("" if not value.query_serializer else "queryParams?: " + value.query_serializer.ts_definition_string(method="read") + ",\n") \
+            + ("" if not value.request_serializer else "data?: " + value.response_serializer.ts_definition_string(method="write") + "\n") \
             + "options?: any,\n" \
             + "onSuccess?(" \
             + ("" if not value.response_serializer else "{ foo: any }") \
@@ -44,7 +44,7 @@ def _get_ts_endpoint_text(key, value) -> str:
             + "...params.options, \n" \
             + "})\n" \
             + ".then((response) => response.json())\n" \
-            + ".then((result: " + value.response_serializer.ts_definition_string() + ") => params.onSuccess & params.onSuccess(result))\n" \
+            + ".then((result: " + value.response_serializer.ts_definition_string(method="read") + ") => params.onSuccess & params.onSuccess(result))\n" \
             + ".catch((error) => params.onError & params.onError(error)); \n" \
             + "}, "
     return text
