@@ -25,6 +25,7 @@ setuptools.setup(
 
     install_requires=[
         'django',
-        'djangorestframework'
+        'djangorestframework',
+        'jsbeautifier'
     ]
 )
