@@ -54,8 +54,7 @@ const API {
             }) : void,
             onError ? (error: any) : void
         },
-    ):
-        Promise < Response > => {
+    ): Promise < Response > => {
             return fetch("/api/v1/myy_endpoint_name", {
                 method: "GET",
                 ...params.options,
