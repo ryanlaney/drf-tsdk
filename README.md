@@ -1,4 +1,4 @@
-# django-typomatic
+# drd-typescript-api-client
 
 _A package to generate a TypeScript API client for [Django Rest Framework](https://www.django-rest-framework.org/) views and viewsets._
 
