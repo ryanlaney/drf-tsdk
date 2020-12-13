@@ -1,5 +1,4 @@
 django
 djangorestframework
 jsbeautifier
-pylint
-pylint-django
+-e ..

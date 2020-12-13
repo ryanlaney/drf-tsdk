@@ -9,6 +9,16 @@
     "python.linting.pylintEnabled": true,
     "python.linting.pylintPath": "venv/bin/pylint",
     "python.linting.pylintUseMinimalCheckers": false,
+    "python.linting.pylintArgs": [
+        "--load-plugins", "pylint_django",
+        "--init-hook", "import sys; sys.path.append('.')",
+        "--variable-rgx=[a-z_]+",
+        "--disable=abstract-method",
+        "--disable=blacklisted-name",
+        "--disable=missing-docstring",
+        "--disable=too-few-public-methods",
+        "--disable=too-many-arguments"
+    ],
 
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true,
