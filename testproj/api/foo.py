@@ -7,12 +7,12 @@ from .common import SuccessSerializer
 
 
 class FooQuerySerializer(serializers.Serializer):
-    user = serializers.UUIDField(
-        required=True, help_text="Description of `user`")
-    from_ = serializers.DateField(required=False)
-    to = serializers.DateField(required=False)
-    archived = serializers.BooleanField(
-        required=False, help_text="Description of `archived`")
+    q1 = serializers.UUIDField(
+        required=True, help_text="Description of `q1`")
+    q2 = serializers.DateField(required=False)
+    q3 = serializers.DateField(required=False)
+    q4 = serializers.BooleanField(
+        required=False, help_text="Description of `q2`")
 
 
 class FooSerializer(serializers.Serializer):

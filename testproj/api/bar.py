@@ -5,21 +5,21 @@ from drf_typescript_api_client import ts_api_client
 
 
 class InnerInnerBarSerializer(serializers.Serializer):
-    g = serializers.CharField()
-    h = serializers.CharField()
+    c1 = serializers.CharField()
+    c2 = serializers.CharField()
 
 
 class InnerBarSerializer(serializers.Serializer):
-    d = serializers.CharField()
-    e = serializers.CharField()
-    f = InnerInnerBarSerializer()
+    b1 = serializers.CharField()
+    b2 = serializers.CharField()
+    b3 = InnerInnerBarSerializer()
 
 
 class BarSerializer(serializers.Serializer):
-    a = serializers.CharField()
-    b = serializers.DecimalField(
+    a1 = serializers.CharField()
+    a2 = serializers.DecimalField(
         max_digits=7, decimal_places=6, allow_null=True)
-    c = InnerBarSerializer(many=True)
+    a3 = InnerBarSerializer(many=True)
 
 
 @api_view(['GET'])
