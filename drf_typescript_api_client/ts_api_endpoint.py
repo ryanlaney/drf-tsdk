@@ -10,10 +10,11 @@ from .drf_to_ts import DRFViewMapper
 _logger = logging.getLogger(f"drf-typescript-api-client.{__name__}")
 
 
-def ts_api_client(
+def ts_api_endpoint(
     path: Tuple[str, ...],
     urlconf: Any = None,
     url: Optional[str] = None,
+    method: str = "GET",
     query_serializer: Optional[Type[serializers.Serializer]] = None,
     request_serializer: Optional[Type[serializers.Serializer]] = None,
     response_serializer: Optional[Type[serializers.Serializer]] = None
@@ -21,7 +22,7 @@ def ts_api_client(
     """Any Django Rest Framework view with this decorator will be added to a
     dynamically-generated TypeScript file with the approprate TypeScript type interfaces.
 
-    @tsapiclient(path=("foo", "list"), response=FooSerializer)
+    @ts_api_interface(path=("foo", "list"), response=FooSerializer)
     @api_client(['GET'])
     def foo(request):
         pass
@@ -36,6 +37,7 @@ def ts_api_client(
             view=view,
             urlconf=urlconf,
             url=url,
+            method=method,
             query_serializer=query_serializer,
             request_serializer=request_serializer,
             response_serializer=response_serializer

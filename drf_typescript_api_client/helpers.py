@@ -1,5 +1,6 @@
 from typing import Optional, Type
 import logging
+import re
 
 from rest_framework import serializers
 
@@ -24,7 +25,9 @@ DEFAULT_SERIALIZER_FIELD_MAPPINGS = {
     serializers.DateField: 'string',
     serializers.TimeField: 'string',
     serializers.DurationField: 'string',
-    serializers.DictField: 'Map'
+    serializers.DictField: 'Map',
+    serializers.HStoreField: 'Map',
+    serializers.JSONField: 'any'
 }
 
 
@@ -39,13 +42,19 @@ class TypeScriptPropertyDefinition:
         self.is_writeonly = is_writeonly
         self.comment = comment
 
+    def _format_name(self) -> str:
+        """Adds quotes arount a string if it contains non-alphanumeric characters"""
+        if re.match(r"[^0-9A-Za-z_]", self.name):
+            return f'"{self.name}"'
+        return self.name
+
     def ts_definition_string(self, method: str = "read") -> Optional[str]:
         if self.is_readonly and method == "write":
             return None
         if self.is_writeonly and method == "read":
             return None
         ret = "" if not self.comment else ("/** " + self.comment + " */\n")
-        ret += self.name + ("?" if self.is_optional else "") + ": " + \
+        ret += self._format_name() + ("?" if self.is_optional else "") + ": " + \
             self.ts_type + ("[]" if self.is_many else "") + \
             (" | null" if self.is_nullable else "")
         return ret
@@ -62,33 +71,48 @@ class TypeScriptEndpointDefinition:
 
 
 class TypeScriptInterfaceDefinition:
-    def __init__(self, serializer: Type[serializers.Serializer], name: Optional[str] = None):
+    def __init__(self, serializer: Type[serializers.Serializer], name: Optional[str] = None, should_export: bool = True, property_definition=None):
         serializer_ = serializer
 
-        self._has_many = False
+        self.is_many = False
         if isinstance(serializer_, serializers.ListSerializer):
             # print("FOUDN LIST SERIALIZER: ", str(_serializer))
             serializer_ = serializer_.child
-            self._has_many = True
+            self.is_many = True
             # print("LIST SERIALIZER CHILD: ", str(_serializer))
 
         if not isinstance(serializer_, serializers.Serializer):
             serializer_ = serializer_()
 
+        self.property_definition = property_definition
         self.serializer = serializer_
         self.name = name
+        self.should_export = should_export
         self.properties = self._get_interface_definition()
 
-    def ts_definition_string(self, method: str = "read") -> str:
+    def ts_definition_string(self, method: str = "read", is_interface_definition: bool = False) -> str:
+        from .drf_to_ts import DRFSerializerMapper
+
         property_strings = []
-        for property_ in self.properties:
-            if isinstance(property_, TypeScriptInterfaceDefinition):
-                property_strings.append(
-                    property_.name + ": " + property_.ts_definition_string(method=method) + (
-                        "[]" if property_._has_many else ""))
-            else:
-                property_strings.append(
-                    property_.ts_definition_string(method=method))
+        if method == "read" and not is_interface_definition and self.serializer.__class__ in DRFSerializerMapper.mappings:
+            name = DRFSerializerMapper.mappings[self.serializer.__class__].name
+            return name
+        else:
+            for property_ in self.properties:
+                if method == "read" and isinstance(property_, TypeScriptInterfaceDefinition):
+                    if property_.serializer.__class__ in DRFSerializerMapper.mappings:
+                        name = DRFSerializerMapper.mappings[property_.serializer.__class__].name
+                        ret = property_.name + ("?" if property_.property_definition.is_optional else "") + ": " + \
+                            name + ("[]" if property_.property_definition.is_many else "") + \
+                            (" | null" if property_.property_definition.is_nullable else "")
+                        property_strings.append(ret)
+                    else:
+                        property_strings.append(
+                            property_.name + ": " + property_.ts_definition_string(method=method) + (
+                                "[]" if property_._has_many else ""))
+                else:
+                    property_strings.append(
+                        property_.ts_definition_string(method=method))
         return "{" + ",\n".join([property_string for property_string in property_strings if property_string is not None]) + "}"
 
     def _get_interface_definition(self) -> Type[TypeScriptPropertyDefinition]:
@@ -110,13 +134,14 @@ class TypeScriptInterfaceDefinition:
 
         properties = []
         for key, value in drf_fields:
-            print(value, isinstance(value, serializers.Serializer)
-                  or isinstance(value, serializers.ListSerializer))
+            # print(value, isinstance(value, serializers.Serializer)
+            #       or isinstance(value, serializers.ListSerializer))
+            property_definition = self._get_property_definition(key, value)
             if isinstance(value, serializers.Serializer) or isinstance(value, serializers.ListSerializer):
-                properties.append(TypeScriptInterfaceDefinition(value, key))
+                properties.append(TypeScriptInterfaceDefinition(
+                    value, key, property_definition=property_definition))
             else:
-                properties.append(self._get_property_definition(
-                    key, value))
+                properties.append(property_definition)
         return properties
 
     def _get_property_definition(self, name: str, field) -> Type[TypeScriptPropertyDefinition]:

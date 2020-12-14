@@ -6,13 +6,19 @@ import jsbeautifier
 
 from .helpers import TypeScriptEndpointDefinition, TypeScriptInterfaceDefinition
 from .exceptions import DRFTypeScriptAPIClientException
-from .drf_to_ts import DRFViewMapper
+from .drf_to_ts import DRFViewMapper, DRFSerializerMapper
 
 _logger = logging.getLogger(f"drf-typescript-api-client.{__name__}")
 
 
 def _default_processor(content):
     return "/** This file was generated automatically by drf-typescript-api-client. */" + "\n\n" + content
+
+
+def _get_ts_interface_text(key, value) -> str:
+    text = f"{'export ' if value.should_export else ''} interface {value.name} " + \
+        value.ts_definition_string(is_interface_definition=True)
+    return text
 
 
 def _get_ts_endpoint_text(key, value) -> str:
@@ -32,14 +38,14 @@ def _get_ts_endpoint_text(key, value) -> str:
             + ("" if not value.query_serializer else "queryParams?: " + value.query_serializer.ts_definition_string(method="read") + ",\n") \
             + ("" if not value.request_serializer else "data?: " + value.response_serializer.ts_definition_string(method="write") + "\n") \
             + "options?: any,\n" \
-            + "onSuccess?(" \
-            + ("" if not value.response_serializer else "{ foo: any }") \
+            + "onSuccess?(result: " \
+            + ("" if not value.response_serializer else value.response_serializer.ts_definition_string(method="read")) \
             + "): void,\n" \
             + "onError?(error: any): void\n" \
             + "},\n" \
             + ") : Promise<Response> => {\n" \
             + 'return fetch(' + ("`" if value.url and "$" in value.url else '"') + (value.url or "") + ("`" if value.url and "$" in value.url else '"') + ("" if not value.query_serializer else (" + \"?\" + new URLSearchParams(params.queryParams || {}).toString()")) + ', {\n' \
-            + 'method: "GET",\n' \
+            + 'method: "' + value.method + '",\n' \
             + ("" if not value.request_serializer else 'body: params.data,\n') \
             + "...params.options, \n" \
             + "})\n" \
@@ -50,7 +56,7 @@ def _get_ts_endpoint_text(key, value) -> str:
     return text
 
 
-def _get_api_client(api_name: str, post_processor: Optional[Callable[[str], str]]) -> str:
+def _get_api_client(api_name: str, post_processor: Callable[[str], str]) -> str:
     """
     Generates the TypeScript API Client documentation text.
     """
@@ -62,16 +68,30 @@ def _get_api_client(api_name: str, post_processor: Optional[Callable[[str], str]
             "`class_name` must not begin with a number.")
 
     content = ""
+
+    # interfaces
+    sep = ""
+    for key, value in DRFSerializerMapper.mappings.items():
+        content += sep
+        content += _get_ts_interface_text(key, value)
+        sep = "\n\n"
+
+    content += "\n\n"
+
+    content += f"const {api_name} = {{\n"
+
+    # endpoints
     sep = ""
     for key, value in DRFViewMapper.mappings.items():
         content += sep
         content += _get_ts_endpoint_text(key, value)
         sep = "\n"
 
-    output = f"const {api_name} = {{\n{ content }\n}};\n\nexport default {api_name};\n"
+    content += f"\n}};\n\nexport default {api_name};\n"
+
     if post_processor is not None:
-        output = post_processor(output)
-    return output
+        content = post_processor(content)
+    return content
 
 
 def generate_api_client(
