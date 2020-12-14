@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from rest_framework.viewsets import ViewSet
 
-from drf_typescript_api_client import ts_api_client
+from drf_typescript_api_client import ts_api_endpoint, ts_api_interface
 
 from .common import SuccessSerializer
 
 
+@ts_api_interface(name="IFooQuery")
 class FooQuerySerializer(serializers.Serializer):
     q1 = serializers.UUIDField(
         required=True, help_text="Description of `q1`")
@@ -15,6 +16,7 @@ class FooQuerySerializer(serializers.Serializer):
         required=False, help_text="Description of `q2`")
 
 
+@ts_api_interface(name="IFoo")
 class FooSerializer(serializers.Serializer):
     x1 = serializers.CharField(help_text="This is some help text for `x`")
     x2 = serializers.DecimalField(
@@ -27,22 +29,22 @@ class FooSerializer(serializers.Serializer):
 
 class FooView(ViewSet):
 
-    @ts_api_client(path=("foo", "list"), urlconf=None, url="/api/v1/foo", query_serializer=FooQuerySerializer, request_serializer=None, response_serializer=FooSerializer(many=True))
+    @ts_api_endpoint(path=("foo", "list"), urlconf=None, url="/api/v1/foo", query_serializer=FooQuerySerializer, request_serializer=None, response_serializer=FooSerializer(many=True))
     def list(self, request):
         pass
 
-    @ts_api_client(path=("foo", "create"), urlconf=None, url="/api/v1/foo", query_serializer=None, request_serializer=FooSerializer, response_serializer=FooSerializer)
+    @ts_api_endpoint(path=("foo", "create"), urlconf=None, url="/api/v1/foo", method="POST", query_serializer=None, request_serializer=FooSerializer, response_serializer=FooSerializer)
     def create(self, request):
         pass
 
-    @ts_api_client(path=("foo", "get"), urlconf=None, url="/api/v1/foo/${pk}", query_serializer=None, request_serializer=None, response_serializer=FooSerializer)
+    @ts_api_endpoint(path=("foo", "get"), urlconf=None, url="/api/v1/foo/${pk}", query_serializer=None, request_serializer=None, response_serializer=FooSerializer)
     def retrieve(self, request, pk):
         pass
 
-    @ts_api_client(path=("foo", "update"), urlconf=None, url="/api/v1/foo/${pk}", query_serializer=None, request_serializer=FooSerializer, response_serializer=FooSerializer)
+    @ts_api_endpoint(path=("foo", "update"), urlconf=None, url="/api/v1/foo/${pk}", method="POST", query_serializer=None, request_serializer=FooSerializer, response_serializer=FooSerializer)
     def update(self, request, pk):
         pass
 
-    @ts_api_client(path=("foo", "delete"), urlconf=None, url="/api/v1/foo/${pk}", query_serializer=None, request_serializer=None, response_serializer=SuccessSerializer)
+    @ts_api_endpoint(path=("foo", "delete"), urlconf=None, url="/api/v1/foo/${pk}", method="DELETE", query_serializer=None, request_serializer=None, response_serializer=SuccessSerializer)
     def destroy(self, request, pk):
         pass
