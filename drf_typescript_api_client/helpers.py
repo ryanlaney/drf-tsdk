@@ -174,7 +174,8 @@ class TypeScriptInterfaceDefinition:
         return TypeScriptPropertyDefinition(
             name=name,
             ts_type=ts_type,
-            is_optional=hasattr(field, 'required') and not field.required,
+            is_optional=not (hasattr(field, "read_only") and field.read_only) and hasattr(
+                field, 'required') and not field.required,
             is_nullable=hasattr(field, 'allow_null') and field.allow_null,
             is_many=is_many,
             is_readonly=hasattr(field, "read_only") and field.read_only,
