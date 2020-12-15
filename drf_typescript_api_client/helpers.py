@@ -86,7 +86,7 @@ class TypeScriptInterfaceDefinition:
 
         self.property_definition = property_definition
         self.serializer = serializer_
-        self.name = name
+        self.name = name or serializer_.__class__.__name__
         self.should_export = should_export
         self.properties = self._get_interface_definition()
 
@@ -102,8 +102,6 @@ class TypeScriptInterfaceDefinition:
                 if method == "read" and isinstance(property_, TypeScriptInterfaceDefinition):
                     if property_.serializer.__class__ in DRFSerializerMapper.mappings:
                         name = DRFSerializerMapper.mappings[property_.serializer.__class__].name
-                        if name is None:
-                            name = property_.serializer.__class__.__name__
                         ret = property_.name + ("?" if property_.property_definition.is_optional else "") + ": " + \
                             name + ("[]" if property_.property_definition.is_many else "") + \
                             (" | null" if property_.property_definition.is_nullable else "")

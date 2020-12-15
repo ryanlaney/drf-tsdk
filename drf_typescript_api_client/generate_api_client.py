@@ -15,7 +15,7 @@ def _default_processor(content):
     return "/** This file was generated automatically by drf-typescript-api-client. */" + "\n\n" + content
 
 
-def _get_ts_interface_text(key, value) -> str:
+def _get_ts_interface_text(value) -> str:
     text = f"{'export ' if value.should_export else ''} interface {value.name} " + \
         value.ts_definition_string(is_interface_definition=True)
     return text
@@ -71,9 +71,9 @@ def _get_api_client(api_name: str, post_processor: Callable[[str], str]) -> str:
 
     # interfaces
     sep = ""
-    for key, value in DRFSerializerMapper.mappings.items():
+    for _, value in DRFSerializerMapper.mappings.items():
         content += sep
-        content += _get_ts_interface_text(key, value)
+        content += _get_ts_interface_text(value)
         sep = "\n\n"
 
     content += "\n\n"
