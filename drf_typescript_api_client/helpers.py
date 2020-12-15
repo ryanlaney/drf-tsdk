@@ -25,8 +25,8 @@ DEFAULT_SERIALIZER_FIELD_MAPPINGS = {
     serializers.DateField: 'string',
     serializers.TimeField: 'string',
     serializers.DurationField: 'string',
-    serializers.DictField: 'Map',
-    serializers.HStoreField: 'Map',
+    serializers.DictField: 'Map<string, any>',
+    serializers.HStoreField: 'Map<string, any>',
     serializers.JSONField: 'any'
 }
 
