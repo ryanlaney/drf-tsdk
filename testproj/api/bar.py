@@ -3,6 +3,8 @@ from rest_framework.decorators import api_view
 
 from drf_typescript_api_client import ts_api_endpoint, ts_api_interface
 
+from .common import UUIDField
+
 
 @ts_api_interface(name="IInnerInnerBar", should_export=False)
 class InnerInnerBarSerializer(serializers.Serializer):
@@ -24,6 +26,7 @@ class BarSerializer(serializers.Serializer):
     a2 = serializers.DecimalField(
         max_digits=7, decimal_places=6, allow_null=True)
     a3 = InnerBarSerializer(many=True, write_only=True)
+    a4 = serializers.ListField(child=serializers.CharField())
 
 
 @api_view(['GET'])

@@ -29,6 +29,8 @@ def my_view(request):
     pass
 ```
 
+Note that using the `@ts_api_interface` decorator isn't necessary; this package supports inline object literals, but for complex APIs, you'll probably end up with a cleaner output (as well as useful, reusable Interfaces) if you use the decorator.
+
 To generate the API client, call `generate_api_client`. Put this in a place where it will be evaluated once, such as at the bottom of your project-level _urls.py_.
 
 _urls.py_

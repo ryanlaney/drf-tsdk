@@ -102,6 +102,8 @@ class TypeScriptInterfaceDefinition:
                 if method == "read" and isinstance(property_, TypeScriptInterfaceDefinition):
                     if property_.serializer.__class__ in DRFSerializerMapper.mappings:
                         name = DRFSerializerMapper.mappings[property_.serializer.__class__].name
+                        if name is None:
+                            name = property_.serializer.__class__.__name__
                         ret = property_.name + ("?" if property_.property_definition.is_optional else "") + ": " + \
                             name + ("[]" if property_.property_definition.is_many else "") + \
                             (" | null" if property_.property_definition.is_nullable else "")
@@ -109,7 +111,7 @@ class TypeScriptInterfaceDefinition:
                     else:
                         property_strings.append(
                             property_.name + ": " + property_.ts_definition_string(method=method) + (
-                                "[]" if property_._has_many else ""))
+                                "[]" if property_.property_definition.is_many else ""))
                 else:
                     property_strings.append(
                         property_.ts_definition_string(method=method))
@@ -124,12 +126,12 @@ class TypeScriptInterfaceDefinition:
         '''
 
         if hasattr(self.serializer, 'get_fields'):
-            _logger.info("Getting serializer definition for '%s'",
-                         type(self.serializer).__name__)
+            _logger.debug("Getting serializer definition for '%s'",
+                          type(self.serializer).__name__)
             drf_fields = self.serializer.get_fields().items()
         else:
-            _logger.info("Getting serializer definition for '%s'",
-                         self.serializer.__name__)
+            _logger.debug("Getting serializer definition for '%s'",
+                          self.serializer.__name__)
             drf_fields = self.serializer._declared_fields.items()
 
         properties = []
@@ -162,9 +164,18 @@ class TypeScriptInterfaceDefinition:
             is_many = False
             field_type = type(field)
 
+        ts_type = DEFAULT_SERIALIZER_FIELD_MAPPINGS.get(field_type)
+        if ts_type is None:
+            for key, value in DEFAULT_SERIALIZER_FIELD_MAPPINGS.items():
+                if issubclass(field_type, key):
+                    ts_type = value
+                    break
+        if ts_type is None:
+            ts_type = "any"
+
         return TypeScriptPropertyDefinition(
             name=name,
-            ts_type=DEFAULT_SERIALIZER_FIELD_MAPPINGS.get(field_type, "any"),
+            ts_type=ts_type,
             is_optional=hasattr(field, 'required') and not field.required,
             is_nullable=hasattr(field, 'allow_null') and field.allow_null,
             is_many=is_many,
