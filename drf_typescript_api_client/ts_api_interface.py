@@ -1,4 +1,5 @@
 import logging
+import re
 
 from typing import Optional
 
@@ -15,6 +16,14 @@ def ts_api_interface(name: Optional[str] = None, should_export: bool = True):
     class FooSerializer(serializers.Serializer):
         pass
     """
+    if name is not None and not isinstance(name, str):
+        raise TypeError("`name` must be a string or None.")
+    if name is not None and not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", name):
+        raise ValueError(
+            "`name` must start with a letter and contain only alphanumeric characters.")
+    if not isinstance(should_export, bool):
+        raise TypeError("`should_export` must be a boolean.")
+
     def decorator(class_):
         _logger.debug("Getting interface for %s", class_)
         mapper = DRFSerializerMapper(

@@ -32,11 +32,11 @@ def _get_ts_endpoint_text(key, value) -> str:
     else:
         text += " (\n" \
             + (",\n").join([(k + ": string" + (" | null" if v.default is None else ""))
-                            for k, v in value.args.items() if k not in ('self', 'request')]) \
-            + ((",\n") if len([k for k in value.args.keys() if k not in ('self', 'request')]) > 0 else "") \
+                            for k, v in value.args.items() if k not in ('self', 'request', 'args', 'kwargs')]) \
+            + ((",\n") if len([k for k in value.args.keys() if k not in ('self', 'request', 'args', 'kwargs')]) > 0 else "") \
             + "params: {\n" \
-            + ("" if not value.query_serializer else "queryParams?: " + value.query_serializer.ts_definition_string(method="read") + ",\n") \
-            + ("" if not value.request_serializer else "data?: " + value.response_serializer.ts_definition_string(method="write") + "\n") \
+            + ("" if not value.query_serializer else "query?: " + value.query_serializer.ts_definition_string(method="read") + ",\n") \
+            + ("" if not value.body_serializer else "data?: " + value.response_serializer.ts_definition_string(method="write") + "\n") \
             + "options?: any,\n" \
             + "onSuccess?(result: " \
             + ("" if not value.response_serializer else value.response_serializer.ts_definition_string(method="read")) \
@@ -44,9 +44,9 @@ def _get_ts_endpoint_text(key, value) -> str:
             + "onError?(error: any): void\n" \
             + "},\n" \
             + ") : Promise<Response> => {\n" \
-            + 'return fetch(' + ("`" if value.url and "$" in value.url else '"') + (value.url or "") + ("`" if value.url and "$" in value.url else '"') + ("" if not value.query_serializer else (" + \"?\" + new URLSearchParams(params.queryParams || {}).toString()")) + ', {\n' \
+            + 'return fetch(' + ("`" if value.url and "$" in value.url else '"') + (value.url or "") + ("`" if value.url and "$" in value.url else '"') + ("" if not value.query_serializer else (" + \"?\" + new URLSearchParams(params.query || {}).toString()")) + ', {\n' \
             + 'method: "' + value.method + '",\n' \
-            + ("" if not value.request_serializer else 'body: params.data,\n') \
+            + ("" if not value.body_serializer else 'body: params.data,\n') \
             + "...params.options, \n" \
             + "})\n" \
             + ".then((response) => response.json())\n" \
@@ -107,6 +107,13 @@ def generate_api_client(
     generate_api_client(output_path='/path/to/api.ts', api_name='MyAPIClass',
                         post_processor=lambda docs: comment + '\\n\\n' + docs)
     """
+    if not isinstance(output_path, str):
+        raise TypeError("`output_path` must be a string.")
+    if not isinstance(api_name, str):
+        raise TypeError("`api_name` must be a string")
+    if post_processor is not None and not callable(post_processor):
+        raise TypeError("`post_processor` must be a Callable or None")
+
     _logger.debug("Generating TypeScript API client")
     with open(output_path, 'w') as output_file:
         api_client_text = _get_api_client(

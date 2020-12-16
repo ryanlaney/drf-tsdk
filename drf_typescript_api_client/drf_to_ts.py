@@ -14,14 +14,14 @@ class DRFViewMapper:
 
     mappings = dict()  # a mapping of DRF views to typescript API endpoints, represented by TypeScriptEndpointDefinition instances
 
-    def __init__(self, path, view, urlconf: Optional[str] = None, url: Optional[str] = None, method: str = "GET", query_serializer=None, request_serializer=None, response_serializer=None):
+    def __init__(self, path, view, urlconf: Optional[str] = None, url: Optional[str] = None, method: str = "GET", query_serializer=None, body_serializer=None, response_serializer=None):
         self.path = path
         self.view = view
         self.urlconf = urlconf
         self.url = url
         self.method = method
         self.query_serializer = query_serializer
-        self.request_serializer = request_serializer
+        self.body_serializer = body_serializer
         self.response_serializer = response_serializer
 
     def _update_mappings_for_path(self, path, mappings_for_path):
@@ -36,8 +36,8 @@ class DRFViewMapper:
                     method=self.method,
                     query_serializer=None if not self.query_serializer else TypeScriptInterfaceDefinition(
                         self.query_serializer),
-                    request_serializer=None if not self.request_serializer else TypeScriptInterfaceDefinition(
-                        self.request_serializer),
+                    body_serializer=None if not self.body_serializer else TypeScriptInterfaceDefinition(
+                        self.body_serializer),
                     response_serializer=None if not self.response_serializer else TypeScriptInterfaceDefinition(
                         self.response_serializer)
                 )

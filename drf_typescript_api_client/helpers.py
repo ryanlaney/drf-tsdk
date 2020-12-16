@@ -61,12 +61,12 @@ class TypeScriptPropertyDefinition:
 
 
 class TypeScriptEndpointDefinition:
-    def __init__(self, url, args, method, query_serializer=None, request_serializer=None, response_serializer=None):
+    def __init__(self, url, args, method, query_serializer=None, body_serializer=None, response_serializer=None):
         self.url = url
         self.args = args
         self.method = method
         self.query_serializer = query_serializer
-        self.request_serializer = request_serializer
+        self.body_serializer = body_serializer
         self.response_serializer = response_serializer
 
 
@@ -96,7 +96,7 @@ class TypeScriptInterfaceDefinition:
         property_strings = []
         if method == "read" and not is_interface_definition and self.serializer.__class__ in DRFSerializerMapper.mappings:
             name = DRFSerializerMapper.mappings[self.serializer.__class__].name
-            return name
+            return name + ("[]" if self.is_many else "")
         else:
             for property_ in self.properties:
                 if method == "read" and isinstance(property_, TypeScriptInterfaceDefinition):
@@ -174,8 +174,8 @@ class TypeScriptInterfaceDefinition:
         return TypeScriptPropertyDefinition(
             name=name,
             ts_type=ts_type,
-            is_optional=not (hasattr(field, "read_only") and field.read_only) and hasattr(
-                field, 'required') and not field.required,
+            is_optional=not (hasattr(field, "read_only") and field.read_only) and ((hasattr(
+                field, 'required') and not field.required)),
             is_nullable=hasattr(field, 'allow_null') and field.allow_null,
             is_many=is_many,
             is_readonly=hasattr(field, "read_only") and field.read_only,

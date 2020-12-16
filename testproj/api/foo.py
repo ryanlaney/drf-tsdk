@@ -11,7 +11,7 @@ class FooQuerySerializer(serializers.Serializer):
     q1 = serializers.UUIDField(
         required=True, help_text="Description of `q1`")
     q2 = serializers.DateField(required=False)
-    q3 = serializers.DateField(required=False)
+    q3 = serializers.IntegerField(default=3)
     q4 = serializers.BooleanField(
         required=False, help_text="Description of `q2`")
 
@@ -29,22 +29,22 @@ class FooSerializer(serializers.Serializer):
 
 class FooView(ViewSet):
 
-    @ts_api_endpoint(path=("foo", "list"), urlconf=None, url="/api/v1/foo", query_serializer=FooQuerySerializer, request_serializer=None, response_serializer=FooSerializer(many=True))
+    @ts_api_endpoint(path=("foo", "list"), urlconf=None, url="/api/v1/foo", query_serializer=FooQuerySerializer, body_serializer=None, response_serializer=FooSerializer(many=True))
     def list(self, request):
         pass
 
-    @ts_api_endpoint(path=("foo", "create"), urlconf=None, url="/api/v1/foo", method="POST", query_serializer=None, request_serializer=FooSerializer, response_serializer=FooSerializer)
+    @ts_api_endpoint(path=("foo", "create"), urlconf=None, url="/api/v1/foo", method="POST", query_serializer=None, body_serializer=FooSerializer, response_serializer=FooSerializer)
     def create(self, request):
         pass
 
-    @ts_api_endpoint(path=("foo", "get"), urlconf=None, url="/api/v1/foo/${pk}", query_serializer=None, request_serializer=None, response_serializer=FooSerializer)
+    @ts_api_endpoint(path=("foo", "get"), urlconf=None, url="/api/v1/foo/${pk}", query_serializer=None, body_serializer=None, response_serializer=FooSerializer)
     def retrieve(self, request, pk):
         pass
 
-    @ts_api_endpoint(path=("foo", "update"), urlconf=None, url="/api/v1/foo/${pk}", method="POST", query_serializer=None, request_serializer=FooSerializer, response_serializer=FooSerializer)
+    @ts_api_endpoint(path=("foo", "update"), urlconf=None, url="/api/v1/foo/${pk}", method="POST", query_serializer=None, body_serializer=FooSerializer, response_serializer=FooSerializer)
     def update(self, request, pk):
         pass
 
-    @ts_api_endpoint(path=("foo", "delete"), urlconf=None, url="/api/v1/foo/${pk}", method="DELETE", query_serializer=None, request_serializer=None, response_serializer=SuccessSerializer)
+    @ts_api_endpoint(path=("foo", "delete"), urlconf=None, url="/api/v1/foo/${pk}", method="DELETE", query_serializer=None, body_serializer=None, response_serializer=SuccessSerializer)
     def destroy(self, request, pk):
         pass

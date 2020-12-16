@@ -28,6 +28,6 @@ class BarSerializer(serializers.Serializer):
 
 
 @api_view(['GET'])
-@ts_api_endpoint(path=["bar"], urlconf=None, url="/api/v1/bar", query_serializer=None, request_serializer=None, response_serializer=BarSerializer(many=True))
+@ts_api_endpoint(path=["bar"], urlconf=None, url="/api/v1/bar", query_serializer=None, body_serializer=None, response_serializer=BarSerializer(many=True))
 def bar(request):
     pass
