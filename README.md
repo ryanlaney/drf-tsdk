@@ -77,9 +77,10 @@ export default API;
 
 # TODO
 
-[x] Throw an error if bad type is detected in one of the decorators. Ex: if user enters a Tuple for the path instead of a List.
-[x] Remove _args_ and _kwargs_ from the generated TypeScript endpoint; these are automatically included as query parameters for DRF views but don't need to be exposed to TS.
-[ ] Add support for FilterInspectors and Paginators
-[x] Add required vs. not-required consideration for serializers fields where the _default_ attribute is specified.
-[ ] Throw an error if two Interfaces are generated with the same name
-[ ] Throw an error if two endpoints have the same path
+- [x] Throw an error if bad type is detected in one of the decorators. Ex: if user enters a Tuple for the path instead of a List.
+- [x] Remove _args_ and _kwargs_ from the generated TypeScript endpoint; these are automatically included as query parameters for DRF
+views but don't need to be exposed to TS.
+- [ ] Add support for FilterInspectors and Paginators
+- [x] Add required vs. not-required consideration for serializers fields where the _default_ attribute is specified.
+- [ ] Throw an error if two Interfaces are generated with the same name
+- [ ] Throw an error if two endpoints have the same path
