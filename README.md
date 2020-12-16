@@ -58,7 +58,7 @@ const API {
     endpointName: (
         params: {
             options ? : any,
-            onSuccess ? (result: ISomeSerializer) : void,
+            onSuccess ? (result: ISomeSerializer[]) : void,
             onError ? (error: any) : void
         },
     ): Promise < Response > => {
@@ -67,7 +67,7 @@ const API {
                 ...params.options,
             })
             .then((response) => response.json())
-            .then((result: ISomeSerializer) => params.onSuccess & params.onSuccess(result))
+            .then((result: ISomeSerializer[]) => params.onSuccess & params.onSuccess(result))
             .catch((error) => params.onError & params.onError(error));
     }
 }
