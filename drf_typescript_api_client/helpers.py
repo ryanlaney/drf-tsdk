@@ -162,12 +162,17 @@ class TypeScriptInterfaceDefinition:
             is_many = False
             field_type = type(field)
 
+        # get TypeScript type string based on DRF serializer field type
         ts_type = DEFAULT_SERIALIZER_FIELD_MAPPINGS.get(field_type)
         if ts_type is None:
-            for key, value in DEFAULT_SERIALIZER_FIELD_MAPPINGS.items():
-                if issubclass(field_type, key):
-                    ts_type = value
-                    break
+            if issubclass(field_type, serializers.ChoiceField) and hasattr(field, "choices"):
+                ts_type = " | ".join(
+                    ['"' + choice + '"' for choice in field.choices])
+            else:
+                for key, value in DEFAULT_SERIALIZER_FIELD_MAPPINGS.items():
+                    if issubclass(field_type, key):
+                        ts_type = value
+                        break
         if ts_type is None:
             ts_type = "any"
 

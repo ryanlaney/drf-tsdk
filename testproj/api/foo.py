@@ -25,6 +25,7 @@ class FooSerializer(serializers.Serializer):
     x4 = serializers.ListField(child=serializers.CharField())
     x5 = serializers.DictField()
     x6 = serializers.JSONField(write_only=True)
+    x7 = serializers.ChoiceField(choices=("choice1", "choice2", "choice3"))
 
 
 class FooView(ViewSet):
