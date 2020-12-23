@@ -44,7 +44,7 @@ def _get_ts_endpoint_text(key, value) -> str:
             + "onError?(error: any): void\n" \
             + "},\n" \
             + ") : Promise<Response> => {\n" \
-            + 'return fetch(' + ("`" if value.url and "$" in value.url else '"') + (value.url or "") + ("`" if value.url and "$" in value.url else '"') + ("" if not value.query_serializer else (" + \"?\" + new URLSearchParams(params.query || {}).toString()")) + ', {\n' \
+            + 'return fetch(' + ("`" if value.url and "$" in value.url else '"') + (value.url or "") + ("`" if value.url and "$" in value.url else '"') + ("" if not value.query_serializer else (" + (Object.keys(params.query).length > 0 ? (\"?\" + new URLSearchParams(params.query || {}).toString()) : \"\")")) + ', {\n' \
             + 'method: "' + value.method + '",\n' \
             + ("" if not value.body_serializer else 'body: params.data,\n') \
             + "...params.options, \n" \
