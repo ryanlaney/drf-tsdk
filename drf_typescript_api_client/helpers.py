@@ -99,7 +99,7 @@ class TypeScriptInterfaceDefinition:
             return name + ("[]" if self.is_many else "")
         else:
             for property_ in self.properties:
-                if method == "read" and isinstance(property_, TypeScriptInterfaceDefinition):
+                if isinstance(property_, TypeScriptInterfaceDefinition):
                     if property_.serializer.__class__ in DRFSerializerMapper.mappings:
                         name = DRFSerializerMapper.mappings[property_.serializer.__class__].name
                         ret = property_.name + ("?" if property_.property_definition.is_optional else "") + ": " + \

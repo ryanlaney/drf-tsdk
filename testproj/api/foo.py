@@ -16,6 +16,11 @@ class FooQuerySerializer(serializers.Serializer):
         required=False, help_text="Description of `q2`")
 
 
+class InnerFooSerializer(serializers.Serializer):
+    y1 = serializers.CharField()
+    y2 = serializers.DateTimeField()
+
+
 @ts_api_interface(name="IFoo")
 class FooSerializer(serializers.Serializer):
     x1 = serializers.CharField(help_text="This is some help text for `x`")
@@ -26,6 +31,7 @@ class FooSerializer(serializers.Serializer):
     x5 = serializers.DictField()
     x6 = serializers.JSONField(write_only=True)
     x7 = serializers.ChoiceField(choices=("choice1", "choice2", "choice3"))
+    x8 = InnerFooSerializer(write_only=True, many=True)
 
 
 class FooView(ViewSet):

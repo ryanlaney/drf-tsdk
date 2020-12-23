@@ -36,7 +36,7 @@ def _get_ts_endpoint_text(key, value) -> str:
             + ((",\n") if len([k for k in value.args.keys() if k not in ('self', 'request', 'args', 'kwargs')]) > 0 else "") \
             + "params: {\n" \
             + ("" if not value.query_serializer else "query?: " + value.query_serializer.ts_definition_string(method="read") + ",\n") \
-            + ("" if not value.body_serializer else "data?: " + value.response_serializer.ts_definition_string(method="write") + "\n") \
+            + ("" if not value.body_serializer else "data?: " + value.response_serializer.ts_definition_string(method="write") + ",\n") \
             + "options?: RequestInit,\n" \
             + "onSuccess?(result: " \
             + ("" if not value.response_serializer else value.response_serializer.ts_definition_string(method="read")) \
