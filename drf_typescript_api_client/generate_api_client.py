@@ -37,7 +37,7 @@ def _get_ts_endpoint_text(key, value) -> str:
             + "params: {\n" \
             + ("" if not value.query_serializer else "query?: " + value.query_serializer.ts_definition_string(method="read") + ",\n") \
             + ("" if not value.body_serializer else "data?: " + value.response_serializer.ts_definition_string(method="write") + "\n") \
-            + "options?: any,\n" \
+            + "options?: RequestInit,\n" \
             + "onSuccess?(result: " \
             + ("" if not value.response_serializer else value.response_serializer.ts_definition_string(method="read")) \
             + "): void,\n" \
