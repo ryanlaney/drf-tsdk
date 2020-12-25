@@ -94,26 +94,36 @@ class TypeScriptInterfaceDefinition:
     def ts_definition_string(self, method: str = "read", is_interface_definition: bool = False) -> str:
         from .drf_to_ts import DRFSerializerMapper
 
-        property_strings = []
         if method == "read" and not is_interface_definition and self.serializer.__class__ in DRFSerializerMapper.mappings:
+            ret = ""
+            if hasattr(self.serializer, "help_text") and self.serializer.help_text:
+                ret = f"/** {self.serializer.help_text} */\n"
             name = DRFSerializerMapper.mappings[self.serializer.__class__].name
-            return name + ("[]" if self.is_many else "")
-        else:
-            for property_ in self.properties:
-                if isinstance(property_, TypeScriptInterfaceDefinition):
-                    if property_.serializer.__class__ in DRFSerializerMapper.mappings:
-                        name = DRFSerializerMapper.mappings[property_.serializer.__class__].name
-                        ret = property_.name + ("?" if property_.property_definition.is_optional else "") + ": " + \
-                            name + ("[]" if property_.property_definition.is_many else "") + \
-                            (" | null" if property_.property_definition.is_nullable else "")
-                        property_strings.append(ret)
-                    else:
-                        property_strings.append(
-                            property_.name + ": " + property_.ts_definition_string(method=method) + (
-                                "[]" if property_.property_definition.is_many else ""))
+            ret += name + ("[]" if self.is_many else "")
+            return ret
+
+        property_strings = []
+        for property_ in self.properties:
+            if isinstance(property_, TypeScriptInterfaceDefinition):
+                if property_.serializer.__class__ in DRFSerializerMapper.mappings:
+                    ret = ""
+                    if hasattr(self.serializer, "help_text") and self.serializer.help_text:
+                        ret = f"/** {self.serializer.help_text} */\n"
+                    name = DRFSerializerMapper.mappings[property_.serializer.__class__].name
+                    ret += property_.name + ("?" if property_.property_definition.is_optional else "") + ": " + \
+                        name + ("[]" if property_.property_definition.is_many else "") + \
+                        (" | null" if property_.property_definition.is_nullable else "")
+                    property_strings.append(ret)
                 else:
-                    property_strings.append(
-                        property_.ts_definition_string(method=method))
+                    ret = ""
+                    if hasattr(property_.serializer, "help_text") and property_.serializer.help_text:
+                        ret = f"/** {property_.serializer.help_text} */\n"
+                    ret += property_.name + ": " + property_.ts_definition_string(method=method) + (
+                        "[]" if property_.property_definition.is_many else "")
+                    property_strings.append(ret)
+            else:
+                property_strings.append(
+                    property_.ts_definition_string(method=method))
         return "{" + ",\n".join([property_string for property_string in property_strings if property_string is not None]) + "}"
 
     def _get_interface_definition(self) -> Type[TypeScriptPropertyDefinition]:

@@ -19,11 +19,13 @@ class FooQuerySerializer(serializers.Serializer):
 class InnerFooSerializer(serializers.Serializer):
     y1 = serializers.CharField()
     y2 = serializers.DateTimeField()
+    y3 = serializers.UUIDField(
+        allow_null=True, help_text="Description of `y3`")
 
 
 @ts_api_interface(name="IFoo")
 class FooSerializer(serializers.Serializer):
-    x1 = serializers.CharField(help_text="This is some help text for `x`")
+    x1 = serializers.CharField(help_text="This is some help text for `x1`")
     x2 = serializers.DecimalField(
         max_digits=12, decimal_places=2, allow_null=True)
     x3 = serializers.DateTimeField(allow_null=True, read_only=True)
@@ -31,7 +33,8 @@ class FooSerializer(serializers.Serializer):
     x5 = serializers.DictField()
     x6 = serializers.JSONField(write_only=True)
     x7 = serializers.ChoiceField(choices=("choice1", "choice2", "choice3"))
-    x8 = InnerFooSerializer(write_only=True, many=True)
+    x8 = InnerFooSerializer(write_only=True, many=True,
+                            help_text="Description of `x8`")
 
 
 class FooView(ViewSet):
