@@ -50,7 +50,7 @@ def _get_ts_endpoint_text(key, value) -> str:
             + "...params.options, \n" \
             + "})\n" \
             + ".then((response) => response.json())\n" \
-            + ".then((result: " + value.response_serializer.ts_definition_string(method="read") + ") => params.onSuccess && params.onSuccess(result))\n" \
+            + ".then((result: " + ("any" if not value.response_serializer else value.response_serializer.ts_definition_string(method="read")) + ") => params.onSuccess && params.onSuccess(result))\n" \
             + ".catch((error) => params.onError && params.onError(error)); \n" \
             + "}, "
     return text
