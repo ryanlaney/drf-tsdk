@@ -59,14 +59,15 @@ class DRFSerializerMapper:
 
     mappings = dict()  # a mapping of DRF serializers to typescript API interfaces, represented by TypeScriptInterfaceDefinition instances
 
-    def __init__(self, serializer: Type[serializers.Serializer], name: Optional[str] = None, should_export: bool = True):
+    def __init__(self, serializer: Type[serializers.Serializer], name: Optional[str] = None, should_export: bool = True, method: str = "read"):
         self.serializer = serializer
         self.name = name
         self.should_export = should_export
+        self.method = method
 
     def _update_mappings(self):
         definition = TypeScriptInterfaceDefinition(
-            serializer=self.serializer, name=self.name, should_export=self.should_export)
+            serializer=self.serializer, name=self.name, should_export=self.should_export, method=self.method)
         DRFSerializerMapper.mappings[self.serializer] = definition
 
     def update_mappings(self):

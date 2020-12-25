@@ -17,7 +17,8 @@ def _default_processor(content):
 
 def _get_ts_interface_text(value) -> str:
     text = f"{'export ' if value.should_export else ''} interface {value.name} " + \
-        value.ts_definition_string(is_interface_definition=True)
+        value.ts_definition_string(
+            is_interface_definition=True, method=value.method)
     return text
 
 

@@ -71,7 +71,7 @@ class TypeScriptEndpointDefinition:
 
 
 class TypeScriptInterfaceDefinition:
-    def __init__(self, serializer: Type[serializers.Serializer], name: Optional[str] = None, should_export: bool = True, property_definition=None):
+    def __init__(self, serializer: Type[serializers.Serializer], name: Optional[str] = None, should_export: bool = True, property_definition=None, method: str = "read"):
         serializer_ = serializer
 
         self.is_many = False
@@ -89,6 +89,7 @@ class TypeScriptInterfaceDefinition:
         self.name = name or serializer_.__class__.__name__
         self.should_export = should_export
         self.properties = self._get_interface_definition()
+        self.method = method
 
     def ts_definition_string(self, method: str = "read", is_interface_definition: bool = False) -> str:
         from .drf_to_ts import DRFSerializerMapper
