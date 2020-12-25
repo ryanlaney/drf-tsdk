@@ -47,7 +47,8 @@ def _get_ts_endpoint_text(key, value) -> str:
             + ") : Promise<Response> => {\n" \
             + 'return fetch(' + ("`" if value.url and "$" in value.url else '"') + (value.url or "") + ("`" if value.url and "$" in value.url else '"') + ("" if not value.query_serializer else (" + (params.query && Object.keys(params.query).length > 0 ? (\"?\" + new URLSearchParams(params.query).toString()) : \"\")")) + ', {\n' \
             + 'method: "' + value.method + '",\n' \
-            + ("" if not value.body_serializer else 'body: params.data,\n') \
+            + 'headers: { "Content-Type": "application/json" },\n' \
+            + ("" if not value.body_serializer else 'body: JSON.stringify(params.data),\n') \
             + "...params.options, \n" \
             + "})\n" \
             + ".then((response) => response.json())\n" \
