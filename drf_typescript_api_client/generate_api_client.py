@@ -1,5 +1,6 @@
 import logging
 import re
+import json
 from typing import Callable, Optional
 
 import jsbeautifier
@@ -22,13 +23,26 @@ def _get_ts_interface_text(value) -> str:
     return text
 
 
-def _get_ts_endpoint_text(key, value) -> str:
+def _get_headers(headers, csrf_token_variable_name) -> str:
+    ret = {}
+    ret['Content-Type'] = "application/json"
+    for key, value in headers.items():
+        ret[key] = value
+    ret_stringified = json.dumps(ret)
+    if csrf_token_variable_name is not None:
+        ret_stringified = '{"X-CSRFTOKEN": ' + csrf_token_variable_name + \
+            ", " + ret_stringified.split("{")[1]
+    return ret_stringified
+
+
+def _get_ts_endpoint_text(key, value, headers, csrf_token_variable_name) -> str:
     text = f"{key}:"
     if isinstance(value, dict):
         text += " {"
         for _key, _value in value.items():
             text += "\n"
-            text += _get_ts_endpoint_text(_key, _value)
+            text += _get_ts_endpoint_text(_key, _value,
+                                          headers, csrf_token_variable_name)
         text += "\n" + "},"
     else:
         text += " (\n" \
@@ -47,7 +61,7 @@ def _get_ts_endpoint_text(key, value) -> str:
             + ") : Promise<Response> => {\n" \
             + 'return fetch(' + ("`" if value.url and "$" in value.url else '"') + (value.url or "") + ("`" if value.url and "$" in value.url else '"') + ("" if not value.query_serializer else (" + (params.query && Object.keys(params.query).length > 0 ? (\"?\" + new URLSearchParams(params.query).toString()) : \"\")")) + ', {\n' \
             + 'method: "' + value.method + '",\n' \
-            + 'headers: { "Content-Type": "application/json" },\n' \
+            + 'headers: ' + _get_headers(headers, csrf_token_variable_name) + ',\n' \
             + ("" if not value.body_serializer else 'body: JSON.stringify(params.data),\n') \
             + "...params.options, \n" \
             + "})\n" \
@@ -58,7 +72,7 @@ def _get_ts_endpoint_text(key, value) -> str:
     return text
 
 
-def _get_api_client(api_name: str, post_processor: Callable[[str], str]) -> str:
+def _get_api_client(api_name: str, headers: dict, csrf_token_variable_name: Optional[str], post_processor: Callable[[str], str]) -> str:
     """
     Generates the TypeScript API Client documentation text.
     """
@@ -86,7 +100,8 @@ def _get_api_client(api_name: str, post_processor: Callable[[str], str]) -> str:
     sep = ""
     for key, value in DRFViewMapper.mappings.items():
         content += sep
-        content += _get_ts_endpoint_text(key, value)
+        content += _get_ts_endpoint_text(key, value,
+                                         headers, csrf_token_variable_name)
         sep = "\n"
 
     content += f"\n}};\n\nexport default {api_name};\n"
@@ -97,10 +112,13 @@ def _get_api_client(api_name: str, post_processor: Callable[[str], str]) -> str:
 
 
 def generate_api_client(
-    output_path: str, api_name: str = "API", post_processor: Optional[Callable[[str], str]] = _default_processor
+    output_path: str, api_name: str = "API", headers: dict = {}, csrf_token_variable_name: Optional[str] = None, post_processor: Optional[Callable[[str], str]] = _default_processor
 ) -> None:
     """Generates the TypeScript API Client .ts file
 
+    :param str output_path: The path of the TypeScript file
+    :param dict headers: A dictionary of headers to add to every request
+    :param str csrf_token_variable_name: A variable name, function call, or other JavaScript-evaluable string which returns the CSRF token
     :param str api_name: The name of the API object
     :param post_processor: If provided, processes the API documentation after compiling and before writing the file (to add a comment or other markup, for instance).
 
@@ -119,6 +137,6 @@ def generate_api_client(
     _logger.debug("Generating TypeScript API client")
     with open(output_path, 'w') as output_file:
         api_client_text = _get_api_client(
-            api_name=api_name, post_processor=post_processor)
+            api_name=api_name, headers=headers, csrf_token_variable_name=csrf_token_variable_name, post_processor=post_processor)
         prettified = jsbeautifier.beautify(api_client_text)
         output_file.write(prettified)
