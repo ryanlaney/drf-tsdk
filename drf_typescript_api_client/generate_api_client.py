@@ -30,7 +30,7 @@ def _get_headers(headers, csrf_token_variable_name) -> str:
         ret[key] = value
     ret_stringified = json.dumps(ret)
     if csrf_token_variable_name is not None:
-        ret_stringified = '{"X-CSRFToken": ' + csrf_token_variable_name + \
+        ret_stringified = '{"X-CSRF-TOKEN": ' + csrf_token_variable_name + \
             ", " + ret_stringified.split("{")[1]
     return ret_stringified
 
