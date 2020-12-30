@@ -5,7 +5,6 @@ from typing import Callable, Optional
 
 import jsbeautifier
 
-from .helpers import TypeScriptEndpointDefinition, TypeScriptInterfaceDefinition
 from .exceptions import DRFTypeScriptAPIClientException
 from .drf_to_ts import DRFViewMapper, DRFSerializerMapper
 
@@ -36,7 +35,10 @@ def _get_headers(headers, csrf_token_variable_name) -> str:
 
 
 def _get_ts_endpoint_text(key, value, headers, csrf_token_variable_name) -> str:
-    text = f"{key}:"
+    text = ""
+    if not isinstance(value, dict) and value.description:
+        text += f"/** {value.description} */\n"
+    text += f"{key}:"
     if isinstance(value, dict):
         text += " {"
         for _key, _value in value.items():

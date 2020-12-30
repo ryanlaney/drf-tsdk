@@ -61,10 +61,11 @@ class TypeScriptPropertyDefinition:
 
 
 class TypeScriptEndpointDefinition:
-    def __init__(self, url, args, method, query_serializer=None, body_serializer=None, response_serializer=None):
+    def __init__(self, url, args, method, description=None, query_serializer=None, body_serializer=None, response_serializer=None):
         self.url = url
         self.args = args
         self.method = method
+        self.description = description
         self.query_serializer = query_serializer
         self.body_serializer = body_serializer
         self.response_serializer = response_serializer

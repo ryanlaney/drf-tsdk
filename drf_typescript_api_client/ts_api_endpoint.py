@@ -16,6 +16,7 @@ def ts_api_endpoint(
     urlconf: Any = None,
     url: Optional[str] = None,
     method: str = "GET",
+    description: Optional[str] = None,
     query_serializer: Optional[Type[serializers.Serializer]] = None,
     body_serializer: Optional[Type[serializers.Serializer]] = None,
     response_serializer: Optional[Type[serializers.Serializer]] = None
@@ -83,6 +84,7 @@ def ts_api_endpoint(
             urlconf=urlconf,
             url=url,
             method=method,
+            description=description,
             query_serializer=query_serializer,
             body_serializer=body_serializer,
             response_serializer=response_serializer
