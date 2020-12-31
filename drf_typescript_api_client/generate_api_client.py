@@ -40,49 +40,16 @@ def _get_headers(headers, csrf_token_variable_name) -> str:
 # TODO: this is pretty hacky, and probably doesn't work in certain cases, esp. with regex. Need to refactor this.
 def _get_url(value, url_patterns) -> (str, str, List[str]):
     """ Returns URL and method of the endpoint """
-    for url_pattern in url_patterns:
-        if isinstance(value.view, APIView):
-            raise Exception("TST")
-        if hasattr(url_pattern.url_pattern.callback, 'actions'):
-            for method, func in url_pattern.url_pattern.callback.actions.items():
-                # print(getattr(url_pattern.url_pattern.callback.cls, "__name__"), value.view.__qualname__)
-                if getattr(getattr(url_pattern.url_pattern.callback.cls, func), "__qualname__") == value.view.__qualname__:
-                    if hasattr(url_pattern.url_pattern.pattern, "_route"):
-                        path = str(url_pattern.url_pattern.pattern._route)
-                        re_pattern = r"\<[A-Za-z0-9_]+\:([A-Za-z0-9_]+)\>"
-                        re_path = re.sub(re_pattern, r"${\1}", path)
-                    else:
-                        path = str(url_pattern.url_pattern.pattern._regex)
-                        re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)"
-                        re_path = re.sub(re_pattern, r"${\1}", path)
-                        if re_path[0] == "^":
-                            re_path = re_path[1:]
-                        if re_path[-1] == "$":
-                            re_path = re_path[:-1]
-                    quote = '"' if path == re_path else '`'
-                    ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
-                    ts_method = method.upper()
-                    ts_args = re.findall(re_pattern, path)
-                    print(getattr(getattr(url_pattern.url_pattern.callback.cls, func), "__qualname__"), value.view.__qualname__, ts_path, ts_method, ts_args)
-                    return (ts_path, ts_method, ts_args)
-        elif str(value.view) == str(url_pattern.url_pattern.callback):
-            if hasattr(url_pattern.url_pattern.pattern, "_route"):
-                path = str(url_pattern.url_pattern.pattern._route)
-                re_pattern = r"\<[A-Za-z0-9_]+\:([A-Za-z0-9_]+)\>"
-                re_path = re.sub(re_pattern, r"${\1}", path)
-            else:
-                path = str(url_pattern.url_pattern.pattern._regex)
-                re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)"
-                re_path = re.sub(re_pattern, r"${\1}", path)
-                if re_path[0] == "^":
-                    re_path = re_path[1:]
-                if re_path[-1] == "$":
-                    re_path = re_path[:-1]
-            quote = '"' if path == re_path else '`'
-            ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
-            ts_method = next(iter([x for x in value.view.cls.http_method_names if x != "options"]), "get").upper()
-            ts_args = re.findall(re_pattern, path)
-            return (ts_path, ts_method, ts_args)
+    if isinstance(value.view, APIView):
+        raise Exception("TEST")
+    url_pattern = url_patterns.get(value.view.__qualname__)
+    if url_pattern:
+        return url_pattern
+
+    url_pattern = url_patterns.get(str(value.view))
+    if url_pattern:
+        return url_pattern
+
     raise DRFTypeScriptAPIClientException(f"No pattern found for View {str(value.view)}")
 
 
@@ -192,6 +159,49 @@ def generate_api_client(
         raise TypeError("`post_processor` must be a Callable or None")
 
     url_patterns = resolve_urls(urlpatterns)
+    url_patterns_dict = {}
+    for url_pattern in url_patterns:
+        if hasattr(url_pattern.url_pattern.callback, 'actions'):
+            for method, func in url_pattern.url_pattern.callback.actions.items():
+                # print(getattr(url_pattern.url_pattern.callback.cls, "__name__"), value.view.__qualname__)
+                if hasattr(url_pattern.url_pattern.pattern, "_route"):
+                    path = str(url_pattern.url_pattern.pattern._route)
+                    re_pattern = r"\<[A-Za-z0-9_]+\:([A-Za-z0-9_]+)\>"
+                    re_path = re.sub(re_pattern, r"${\1}", path)
+                else:
+                    path = str(url_pattern.url_pattern.pattern._regex)
+                    re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)"
+                    re_path = re.sub(re_pattern, r"${\1}", path)
+                    if re_path[0] == "^":
+                        re_path = re_path[1:]
+                    if re_path[-1] == "$":
+                        re_path = re_path[:-1]
+                quote = '"' if path == re_path else '`'
+                ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
+                ts_method = method.upper()
+                ts_args = re.findall(re_pattern, path)
+                url_patterns_dict[getattr(getattr(url_pattern.url_pattern.callback.cls, func), "__qualname__")] = (ts_path, ts_method, ts_args)
+        else:
+            if hasattr(url_pattern.url_pattern.pattern, "_route"):
+                path = str(url_pattern.url_pattern.pattern._route)
+                re_pattern = r"\<[A-Za-z0-9_]+\:([A-Za-z0-9_]+)\>"
+                re_path = re.sub(re_pattern, r"${\1}", path)
+            else:
+                path = str(url_pattern.url_pattern.pattern._regex)
+                re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)"
+                re_path = re.sub(re_pattern, r"${\1}", path)
+                if re_path[0] == "^":
+                    re_path = re_path[1:]
+                if re_path[-1] == "$":
+                    re_path = re_path[:-1]
+            quote = '"' if path == re_path else '`'
+            ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
+            ts_method = next(iter([x for x in url_pattern.url_pattern.callback.cls.http_method_names if x != "options"]), "get").upper()
+            ts_args = re.findall(re_pattern, path)
+            url_patterns_dict[url_pattern.url_pattern.callback] = (ts_path, ts_method, ts_args)
+
+    print(url_patterns_dict)
+    return
     # print([{
     #         'pattern': {
     #             'route': p.url_pattern.pattern._route,
@@ -210,6 +220,6 @@ def generate_api_client(
     _logger.debug("Generating TypeScript API client")
     with open(output_path, 'w') as output_file:
         api_client_text = _get_api_client(
-            api_name=api_name, headers=headers, csrf_token_variable_name=csrf_token_variable_name, post_processor=post_processor, url_patterns=url_patterns)
+            api_name=api_name, headers=headers, csrf_token_variable_name=csrf_token_variable_name, post_processor=post_processor, url_patterns=url_patterns_dict)
         prettified = jsbeautifier.beautify(api_client_text)
         output_file.write(prettified)
