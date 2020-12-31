@@ -37,6 +37,7 @@ def _get_headers(headers, csrf_token_variable_name) -> str:
             ", " + ret_stringified.split("{")[1]
     return ret_stringified
 
+# TODO: this is pretty hacky, and probably doesn't work in certain cases, esp. with regex. Need to refactor this.
 def _get_url(value, url_patterns) -> (str, str, List[str]):
     """ Returns URL and method of the endpoint """
     for url_pattern in url_patterns:
@@ -46,7 +47,6 @@ def _get_url(value, url_patterns) -> (str, str, List[str]):
             for method, func in url_pattern.url_pattern.callback.actions.items():
                 # print(getattr(url_pattern.url_pattern.callback.cls, "__name__"), value.view.__qualname__)
                 if getattr(getattr(url_pattern.url_pattern.callback.cls, func), "__qualname__") == value.view.__qualname__:
-                    print(getattr(getattr(url_pattern.url_pattern.callback.cls, func), "__qualname__"), value.view.__qualname__)
                     if hasattr(url_pattern.url_pattern.pattern, "_route"):
                         path = str(url_pattern.url_pattern.pattern._route)
                         re_pattern = r"\<[A-Za-z0-9_]+\:([A-Za-z0-9_]+)\>"
@@ -55,10 +55,15 @@ def _get_url(value, url_patterns) -> (str, str, List[str]):
                         path = str(url_pattern.url_pattern.pattern._regex)
                         re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)"
                         re_path = re.sub(re_pattern, r"${\1}", path)
+                        if re_path[0] == "^":
+                            re_path = re_path[1:]
+                        if re_path[-1] == "$":
+                            re_path = re_path[:-1]
                     quote = '"' if path == re_path else '`'
                     ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
                     ts_method = method.upper()
                     ts_args = re.findall(re_pattern, path)
+                    print(getattr(getattr(url_pattern.url_pattern.callback.cls, func), "__qualname__"), value.view.__qualname__, ts_path, ts_method, ts_args)
                     return (ts_path, ts_method, ts_args)
         elif str(value.view) == str(url_pattern.url_pattern.callback):
             if hasattr(url_pattern.url_pattern.pattern, "_route"):
@@ -69,6 +74,10 @@ def _get_url(value, url_patterns) -> (str, str, List[str]):
                 path = str(url_pattern.url_pattern.pattern._regex)
                 re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)"
                 re_path = re.sub(re_pattern, r"${\1}", path)
+                if re_path[0] == "^":
+                    re_path = re_path[1:]
+                if re_path[-1] == "$":
+                    re_path = re_path[:-1]
             quote = '"' if path == re_path else '`'
             ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
             ts_method = next(iter([x for x in value.view.cls.http_method_names if x != "options"]), "get").upper()
