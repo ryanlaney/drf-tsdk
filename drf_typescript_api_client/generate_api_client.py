@@ -44,9 +44,9 @@ def _get_url(value, url_patterns) -> (str, str, List[str]):
             raise Exception("TST")
         if hasattr(url_pattern.url_pattern.callback, 'actions'):
             for method, func in url_pattern.url_pattern.callback.actions.items():
-                # print(getattr(getattr(url_pattern.url_pattern.callback.cls, func), "__qualname__"), value.view.__qualname__)
                 # print(getattr(url_pattern.url_pattern.callback.cls, "__name__"), value.view.__qualname__)
                 if getattr(getattr(url_pattern.url_pattern.callback.cls, func), "__qualname__") == value.view.__qualname__:
+                    print(getattr(getattr(url_pattern.url_pattern.callback.cls, func), "__qualname__"), value.view.__qualname__)
                     if hasattr(url_pattern.url_pattern.pattern, "_route"):
                         path = str(url_pattern.url_pattern.pattern._route)
                         re_pattern = r"\<[A-Za-z0-9_]+\:([A-Za-z0-9_]+)\>"
