@@ -158,6 +158,7 @@ def generate_api_client(
     if post_processor is not None and not callable(post_processor):
         raise TypeError("`post_processor` must be a Callable or None")
 
+    # TODO: very hacky
     url_patterns = resolve_urls(urlpatterns)
     url_patterns_dict = {}
     for url_pattern in url_patterns:
@@ -198,10 +199,10 @@ def generate_api_client(
             ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
             ts_method = next(iter([x for x in url_pattern.url_pattern.callback.cls.http_method_names if x != "options"]), "get").upper()
             ts_args = re.findall(re_pattern, path)
-            url_patterns_dict[url_pattern.url_pattern.callback] = (ts_path, ts_method, ts_args)
+            url_patterns_dict[str(url_pattern.url_pattern.callback)] = (ts_path, ts_method, ts_args)
 
-    print(url_patterns_dict)
-    return
+    # print(url_patterns_dict)
+    # return
     # print([{
     #         'pattern': {
     #             'route': p.url_pattern.pattern._route,
