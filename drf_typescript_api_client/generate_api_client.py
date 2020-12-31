@@ -181,7 +181,7 @@ def generate_api_client(
                 ts_method = method.upper()
                 ts_args = re.findall(re_pattern, path)
                 url_patterns_dict[getattr(getattr(url_pattern.url_pattern.callback.cls, func), "__qualname__")] = (ts_path, ts_method, ts_args)
-        else:
+        elif hasattr(url_pattern.url_pattern.callback, "cls"):
             if hasattr(url_pattern.url_pattern.pattern, "_route"):
                 path = str(url_pattern.url_pattern.pattern._route)
                 re_pattern = r"\<[A-Za-z0-9_]+\:([A-Za-z0-9_]+)\>"
