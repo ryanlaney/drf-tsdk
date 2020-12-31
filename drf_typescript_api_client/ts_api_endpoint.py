@@ -7,6 +7,7 @@ from rest_framework import serializers
 
 from .exceptions import DRFTypeScriptAPIClientException
 from .drf_to_ts import DRFViewMapper
+from .url_resolver  import resolve_urls
 
 _logger = logging.getLogger(f"drf-typescript-api-client.{__name__}")
 
@@ -81,9 +82,6 @@ def ts_api_endpoint(
         mapper = DRFViewMapper(
             path=path,
             view=view,
-            urlconf=urlconf,
-            url=url,
-            method=method,
             description=description,
             query_serializer=query_serializer,
             body_serializer=body_serializer,

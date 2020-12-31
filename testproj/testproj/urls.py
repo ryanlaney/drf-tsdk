@@ -25,4 +25,5 @@ def post_processor(content):
 generate_api_client(
     os.path.join(settings.BASE_DIR, "output", "api.ts"),
     csrf_token_variable_name="csrftoken",
-    post_processor=post_processor)
+    post_processor=post_processor,
+    urlpatterns=urlpatterns)

@@ -39,22 +39,22 @@ class FooSerializer(serializers.Serializer):
 
 class FooView(ViewSet):
 
-    @ts_api_endpoint(path=("foo", "list"), urlconf=None, url="/api/v1/foo", description="Get a list of Foos", query_serializer=FooQuerySerializer, body_serializer=None, response_serializer=FooSerializer(many=True))
+    @ts_api_endpoint(path=("foo", "list"), description="Get a list of Foos", query_serializer=FooQuerySerializer, body_serializer=None, response_serializer=FooSerializer(many=True))
     def list(self, request):
         pass
 
-    @ts_api_endpoint(path=("foo", "create"), urlconf=None, url="/api/v1/foo", method="POST", description="Create a Foo", query_serializer=None, body_serializer=FooSerializer, response_serializer=FooSerializer)
+    @ts_api_endpoint(path=("foo", "create"), description="Create a Foo", query_serializer=None, body_serializer=FooSerializer, response_serializer=FooSerializer)
     def create(self, request):
         pass
 
-    @ts_api_endpoint(path=("foo", "get"), urlconf=None, url="/api/v1/foo/${pk}", description="Get a single Foo", query_serializer=None, body_serializer=None, response_serializer=FooSerializer)
+    @ts_api_endpoint(path=("foo", "get"), description="Get a single Foo", query_serializer=None, body_serializer=None, response_serializer=FooSerializer)
     def retrieve(self, request, pk):
         pass
 
-    @ts_api_endpoint(path=("foo", "update"), urlconf=None, url="/api/v1/foo/${pk}", method="POST", description="Update a Foo", query_serializer=None, body_serializer=FooSerializer, response_serializer=FooSerializer)
+    @ts_api_endpoint(path=("foo", "update"), description="Update a Foo", query_serializer=None, body_serializer=FooSerializer, response_serializer=FooSerializer)
     def update(self, request, pk):
         pass
 
-    @ts_api_endpoint(path=("foo", "delete"), urlconf=None, url="/api/v1/foo/${pk}", method="DELETE", description="Delete a Foo", query_serializer=None, body_serializer=None, response_serializer=SuccessSerializer)
+    @ts_api_endpoint(path=("foo", "delete"), description="Delete a Foo", query_serializer=None, body_serializer=None, response_serializer=SuccessSerializer)
     def destroy(self, request, pk):
         pass

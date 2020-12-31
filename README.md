@@ -80,6 +80,7 @@ export default API;
 - [ ] Add support for FilterInspectors and Paginators
 - [ ] Throw an error if two Interfaces are generated with the same name
 - [ ] Throw an error if two endpoints have the same path
+- [ ] Refactor... especially *generate_api_client.py*
 - [ ] Automatically resolve endpoint URL if possible (i.e. using Django `reverse`)
 - [ ] Automatically resolve endpoint type (_GET_, _POST_, etc) if possible (i.e. also using Django `reverse` and inspecting the view decorators)
 - [ ] Add support for `serializer_class` in ViewSets, overridable by `response_serializer`. Investigate how this is handled by DRF e.g. when generating Swagger docs and mimic this behavior.

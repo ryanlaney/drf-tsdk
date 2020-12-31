@@ -27,7 +27,7 @@ class BarSerializer(serializers.Serializer):
     a4 = serializers.ListField(child=serializers.CharField())
 
 
+@ts_api_endpoint(path=["bar"], query_serializer=None, body_serializer=None, response_serializer=BarSerializer(many=True))
 @api_view(['GET'])
-@ts_api_endpoint(path=["bar"], urlconf=None, url="/api/v1/bar", query_serializer=None, body_serializer=None, response_serializer=BarSerializer(many=True))
 def bar(request):
     pass
