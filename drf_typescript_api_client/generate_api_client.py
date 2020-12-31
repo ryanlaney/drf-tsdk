@@ -44,6 +44,7 @@ def _get_url(value, url_patterns) -> (str, str, List[str]):
             raise Exception("TST")
         if hasattr(url_pattern.url_pattern.callback, 'actions'):
             for method, func in url_pattern.url_pattern.callback.actions.items():
+                print(getattr(url_pattern.url_pattern.callback.cls, func), value.view)
                 if getattr(url_pattern.url_pattern.callback.cls, func) == value.view:
                     if hasattr(url_pattern.url_pattern.pattern, "_route"):
                         path = str(url_pattern.url_pattern.pattern._route)

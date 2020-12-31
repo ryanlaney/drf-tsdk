@@ -44,7 +44,7 @@ class FooView(ViewSet):
         pass
 
     @ts_api_endpoint(path=("foo", "create"), description="Create a Foo", query_serializer=None, body_serializer=FooSerializer, response_serializer=FooSerializer)
-    def create(self, request):
+    def create(self, request, test=None):
         pass
 
     @ts_api_endpoint(path=("foo", "get"), description="Get a single Foo", query_serializer=None, body_serializer=None, response_serializer=FooSerializer)
