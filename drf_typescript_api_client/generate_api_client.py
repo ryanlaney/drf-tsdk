@@ -41,8 +41,7 @@ def _get_headers(headers, csrf_token_variable_name) -> str:
 # TODO: this is pretty hacky, and probably doesn't work in certain cases, esp. with regex. Need to refactor this.
 def _get_url(value, url_patterns) -> (str, str, List[str]):
     """ Returns URL and method of the endpoint """
-    if isinstance(value.view, APIView):
-        raise Exception("TEST")
+
     url_pattern = url_patterns.get(inspect.getmodule(value.view).__name__ + ":" + value.view.__qualname__)
     if url_pattern:
         return url_pattern
@@ -50,6 +49,11 @@ def _get_url(value, url_patterns) -> (str, str, List[str]):
     url_pattern = url_patterns.get(inspect.getmodule(value.view).__name__ + ":" + value.view.__name__)
     if url_pattern:
         return url_pattern
+
+    if hasattr(str(value.view), "cls"):
+        url_pattern = url_patterns.get(str(value.view.cls))
+        if url_pattern:
+            return url_pattern
 
     raise DRFTypeScriptAPIClientException(f"No pattern found for View {str(value.view)} {str(value.view.__name__)}")
 
@@ -163,6 +167,7 @@ def generate_api_client(
     url_patterns = resolve_urls(urlpatterns)
     url_patterns_dict = {}
     for url_pattern in url_patterns:
+        # ViewSets
         if hasattr(url_pattern.url_pattern.callback, 'actions'):
             for method, func in url_pattern.url_pattern.callback.actions.items():
                 # print(getattr(url_pattern.url_pattern.callback.cls, "__name__"), value.view.__qualname__)
@@ -182,7 +187,35 @@ def generate_api_client(
                 ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
                 ts_method = method.upper()
                 ts_args = re.findall(re_pattern, path)
-                url_patterns_dict[inspect.getmodule(url_pattern.url_pattern.callback).__name__ + ":" + getattr(getattr(url_pattern.url_pattern.callback.cls, func), "__qualname__")] = (ts_path, ts_method, ts_args)
+                url_patterns_dict[inspect.getmodule(url_pattern.url_pattern.callback).__name__ + ":" +
+                                  getattr(getattr(url_pattern.url_pattern.callback.cls, func),
+                                          "__qualname__")] = (ts_path, ts_method, ts_args)
+                url_patterns_dict[str(url_pattern.url_pattern.callback)] = (ts_path, ts_method, ts_args)
+        # APIViews
+        elif hasattr(url_pattern.url_pattern.callback, 'view_class') and 'WrappedAPIView' not in str(url_pattern.url_pattern.callback):
+            actions = {k: v for k, v in url_pattern.url_pattern.callback.view_class.__dict__.items() if callable(v)}
+            for method, func in actions.items():
+                if hasattr(url_pattern.url_pattern.pattern, "_route"):
+                    path = str(url_pattern.url_pattern.pattern._route)
+                    re_pattern = r"\<[A-Za-z0-9_]+\:([A-Za-z0-9_]+)\>"
+                    re_path = re.sub(re_pattern, r"${\1}", path)
+                else:
+                    path = str(url_pattern.url_pattern.pattern._regex)
+                    re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)"
+                    re_path = re.sub(re_pattern, r"${\1}", path)
+                    if re_path[0] == "^":
+                        re_path = re_path[1:]
+                    if re_path[-1] == "$":
+                        re_path = re_path[:-1]
+                quote = '"' if path == re_path else '`'
+                ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
+                ts_method = method.upper()
+                ts_args = re.findall(re_pattern, path)
+                url_patterns_dict[inspect.getmodule(url_pattern.url_pattern.callback).__name__ + ":" +
+                                  getattr(getattr(url_pattern.url_pattern.callback.view_class, method),
+                                          "__qualname__")] = (ts_path, ts_method, ts_args)
+                url_patterns_dict[str(url_pattern.url_pattern.callback)] = (ts_path, ts_method, ts_args)
+        # @api_views
         elif hasattr(url_pattern.url_pattern.callback, "cls"):
             if hasattr(url_pattern.url_pattern.pattern, "_route"):
                 path = str(url_pattern.url_pattern.pattern._route)
@@ -198,11 +231,14 @@ def generate_api_client(
                     re_path = re_path[:-1]
             quote = '"' if path == re_path else '`'
             ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
-            ts_method = next(iter([x for x in url_pattern.url_pattern.callback.cls.http_method_names if x != "options"]), "get").upper()
+            ts_method = next(
+                iter([x for x in url_pattern.url_pattern.callback.cls.http_method_names if x != "options"]), "get"
+            ).upper()
             ts_args = re.findall(re_pattern, path)
-            url_patterns_dict[inspect.getmodule(url_pattern.url_pattern.callback).__name__ + ":" + url_pattern.url_pattern.callback.__name__] = (ts_path, ts_method, ts_args)
+            url_patterns_dict[inspect.getmodule(url_pattern.url_pattern.callback).__name__ + ":" +
+                              url_pattern.url_pattern.callback.__name__] = (ts_path, ts_method, ts_args)
+            url_patterns_dict[str(url_pattern.url_pattern.callback)] = (ts_path, ts_method, ts_args)
 
-    print(json.dumps(url_patterns_dict, indent=2))
     # print(url_patterns_dict)
     # return
     # print([{
