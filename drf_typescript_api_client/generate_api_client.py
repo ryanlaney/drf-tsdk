@@ -1,6 +1,7 @@
 import logging
 import re
 import json
+import inspect
 from typing import Callable, List, Optional
 
 from django.urls import URLPattern
@@ -42,11 +43,11 @@ def _get_url(value, url_patterns) -> (str, str, List[str]):
     """ Returns URL and method of the endpoint """
     if isinstance(value.view, APIView):
         raise Exception("TEST")
-    url_pattern = url_patterns.get(value.view.__qualname__)
+    url_pattern = url_patterns.get(inspect.getmodule(value.view).__name__ + ":" + value.view.__qualname__)
     if url_pattern:
         return url_pattern
 
-    url_pattern = url_patterns.get(str(value.view))
+    url_pattern = url_patterns.get(inspect.getmodule(value.view).__name__ + ":" + value.view.__name__)
     if url_pattern:
         return url_pattern
 
@@ -181,7 +182,7 @@ def generate_api_client(
                 ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
                 ts_method = method.upper()
                 ts_args = re.findall(re_pattern, path)
-                url_patterns_dict[getattr(getattr(url_pattern.url_pattern.callback.cls, func), "__qualname__")] = (ts_path, ts_method, ts_args)
+                url_patterns_dict[inspect.getmodule(url_pattern.url_pattern.callback).__name__ + ":" + getattr(getattr(url_pattern.url_pattern.callback.cls, func), "__qualname__")] = (ts_path, ts_method, ts_args)
         elif hasattr(url_pattern.url_pattern.callback, "cls"):
             if hasattr(url_pattern.url_pattern.pattern, "_route"):
                 path = str(url_pattern.url_pattern.pattern._route)
@@ -199,8 +200,9 @@ def generate_api_client(
             ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
             ts_method = next(iter([x for x in url_pattern.url_pattern.callback.cls.http_method_names if x != "options"]), "get").upper()
             ts_args = re.findall(re_pattern, path)
-            url_patterns_dict[str(url_pattern.url_pattern.callback)] = (ts_path, ts_method, ts_args)
+            url_patterns_dict[inspect.getmodule(url_pattern.url_pattern.callback).__name__ + ":" + url_pattern.url_pattern.callback.__name__] = (ts_path, ts_method, ts_args)
 
+    print(json.dumps(url_patterns_dict, indent=2))
     # print(url_patterns_dict)
     # return
     # print([{
