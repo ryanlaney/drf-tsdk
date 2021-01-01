@@ -50,7 +50,7 @@ def _get_url(value, url_patterns) -> (str, str, List[str]):
     if url_pattern:
         return url_pattern
 
-    raise DRFTypeScriptAPIClientException(f"No pattern found for View {str(value.view)}")
+    raise DRFTypeScriptAPIClientException(f"No pattern found for View {str(value.view)} {str(value.view.__name__)}")
 
 
 def _get_ts_endpoint_text(key, value, headers, csrf_token_variable_name, url_patterns) -> str:
