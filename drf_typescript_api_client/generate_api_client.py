@@ -81,7 +81,7 @@ def _get_ts_endpoint_text(key, value, headers, csrf_token_variable_name, url_pat
             + ("" if not value.body_serializer else "data?: " + value.body_serializer.ts_definition_string(method="write") + ",\n") \
             + "options?: RequestInit,\n" \
             + "onSuccess?(result: " \
-            + ("" if not value.response_serializer else value.response_serializer.ts_definition_string(method="read")) \
+            + ("any" if not value.response_serializer else value.response_serializer.ts_definition_string(method="read")) \
             + "): void,\n" \
             + "onError?(error: any): void\n" \
             + "},\n" \
