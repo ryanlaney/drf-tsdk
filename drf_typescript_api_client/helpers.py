@@ -53,7 +53,7 @@ class TypeScriptPropertyDefinition:
             return None
         if self.is_writeonly and method == "read":
             return None
-        ret = "" if not self.comment else ("/** " + self.comment + " */\n")
+        ret = "" if not self.comment else ("/** " + self.comment.replace("\n","\n * ") + " */\n")
         ret += self._format_name() + ("?" if self.is_optional else "") + ": " + \
             self.ts_type + ("[]" if self.is_many else "") + \
             (" | null" if self.is_nullable else "")

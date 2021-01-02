@@ -61,7 +61,7 @@ def _get_url(value, url_patterns) -> (str, str, List[str]):
 def _get_ts_endpoint_text(key, value, headers, csrf_token_variable_name, url_patterns) -> str:
     text = ""
     if not isinstance(value, dict) and value.description:
-        text += f"/** {value.description} */\n"
+        text += f"/** {value.description.replace('\n','\n * ')} */\n"
     text += f"{key}:"
     if isinstance(value, dict):
         text += " {"
