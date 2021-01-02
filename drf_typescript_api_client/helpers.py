@@ -199,8 +199,6 @@ class TypeScriptInterfaceDefinition:
             else:
                 child_type = self._get_property_definition(
                     name="dummy", field=field.child).ts_type
-                print("dict", field, field.child, self._get_property_definition(
-                    name="dummy", field=field.child).ts_type)
             ts_type = f"Map<string, {child_type}>"
 
         return TypeScriptPropertyDefinition(
