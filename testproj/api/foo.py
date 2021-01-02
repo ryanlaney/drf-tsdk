@@ -25,16 +25,25 @@ class InnerFooSerializer(serializers.Serializer):
 
 @ts_api_interface(name="IFoo")
 class FooSerializer(serializers.Serializer):
-    x1 = serializers.CharField(help_text="This is some help text for `x1`")
-    x2 = serializers.DecimalField(
+    char_field = serializers.CharField(
+        help_text="This is some help text for `x1`")
+    decimal_field = serializers.DecimalField(
         max_digits=12, decimal_places=2, allow_null=True)
-    x3 = serializers.DateTimeField(allow_null=True, read_only=True)
-    x4 = serializers.ListField(child=serializers.CharField())
-    x5 = serializers.DictField()
-    x6 = serializers.JSONField(write_only=True)
-    x7 = serializers.ChoiceField(choices=("choice1", "choice2", "choice3"))
-    x8 = InnerFooSerializer(write_only=True, many=True,
-                            help_text="Description of `x8`")
+    datetime_field = serializers.DateTimeField(allow_null=True, read_only=True)
+    list_field_char_child = serializers.ListField(
+        child=serializers.CharField())
+    dict_field = serializers.DictField()
+    json_field = serializers.JSONField(write_only=True)
+    choice_field = serializers.ChoiceField(
+        choices=("choice1", "choice2", "choice3"))
+    serializer_field = InnerFooSerializer(write_only=True, many=True,
+                                          help_text="Description of `x8`")
+    dict_field_with_integer_child = serializers.DictField(
+        child=serializers.IntegerField())
+    dict_field_with_serializer_child = serializers.DictField(
+        child=InnerFooSerializer())
+    dift_field_with_list_serializer_child = serializers.DictField(
+        child=InnerFooSerializer(many=True))
 
 
 class FooView(ViewSet):

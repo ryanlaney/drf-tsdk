@@ -53,7 +53,8 @@ class TypeScriptPropertyDefinition:
             return None
         if self.is_writeonly and method == "read":
             return None
-        ret = "" if not self.comment else ("/** " + self.comment.replace("\n","\n * ") + " */\n")
+        ret = "" if not self.comment else (
+            "/** " + self.comment.replace("\n", "\n * ") + " */\n")
         ret += self._format_name() + ("?" if self.is_optional else "") + ": " + \
             self.ts_type + ("[]" if self.is_many else "") + \
             (" | null" if self.is_nullable else "")
@@ -144,8 +145,6 @@ class TypeScriptInterfaceDefinition:
 
         properties = []
         for key, value in drf_fields:
-            # print(value, isinstance(value, serializers.Serializer)
-            #       or isinstance(value, serializers.ListSerializer))
             property_definition = self._get_property_definition(key, value)
             if isinstance(value, serializers.Serializer) or isinstance(value, serializers.ListSerializer):
                 properties.append(TypeScriptInterfaceDefinition(
@@ -162,10 +161,10 @@ class TypeScriptInterfaceDefinition:
         :param field: The definition of the serializer field
         :return: A TypeScriptParameterDefinition instance
         '''
-        if hasattr(field, 'child'):
+        if hasattr(field, 'child') and not isinstance(field, serializers.DictField):
             is_many = True
             field_type = type(field.child)
-        elif hasattr(field, 'child_relation'):
+        elif hasattr(field, 'child_relation') and not isinstance(field, serializers.DictField):
             is_many = True
             field_type = type(field.child_relation)
         else:
@@ -185,6 +184,24 @@ class TypeScriptInterfaceDefinition:
                         break
         if ts_type is None:
             ts_type = "any"
+
+        if isinstance(field, serializers.DictField) and hasattr(field, "child") and field.child:
+            if isinstance(field.child, serializers.ListSerializer):
+                definition = TypeScriptInterfaceDefinition(
+                    serializer=field.child, should_export=False, method="read" if not hasattr(self, 'method') else self.method)
+                child_type = definition.ts_definition_string(
+                    method="read" if not hasattr(self, 'method') else self.method) + "[]"
+            elif isinstance(field.child, serializers.Serializer):
+                definition = TypeScriptInterfaceDefinition(
+                    serializer=field.child, should_export=False, method="read" if not hasattr(self, 'method') else self.method)
+                child_type = definition.ts_definition_string(
+                    method="read" if not hasattr(self, 'method') else self.method)
+            else:
+                child_type = self._get_property_definition(
+                    name="dummy", field=field.child).ts_type
+                print("dict", field, field.child, self._get_property_definition(
+                    name="dummy", field=field.child).ts_type)
+            ts_type = f"Map<string, {child_type}>"
 
         return TypeScriptPropertyDefinition(
             name=name,
