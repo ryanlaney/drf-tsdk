@@ -201,7 +201,7 @@ def generate_api_client(
                     re_path = re.sub(re_pattern, r"${\1}", path)
                 else:
                     path = str(url_pattern.url_pattern.pattern._regex)
-                    re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)"
+                    re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)[\/\$\']"
                     re_path = re.sub(re_pattern, r"${\1}", path)
                     if re_path[0] == "^":
                         re_path = re_path[1:]
