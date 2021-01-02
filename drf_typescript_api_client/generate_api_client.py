@@ -180,7 +180,7 @@ def generate_api_client(
                     re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)\/"
                     re_path = re.sub(re_pattern, r"${\1}/", path)
                     re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)\$"
-                    re_path = re.sub(re_pattern, r"${\1}", path)
+                    re_path = re.sub(re_pattern, r"${\1}", re_path)
                     if re_path[0] == "^":
                         re_path = re_path[1:]
                     if re_path[-1] == "$":
@@ -188,7 +188,7 @@ def generate_api_client(
                 quote = '"' if path == re_path else '`'
                 ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
                 ts_method = method.upper()
-                ts_args = re.findall(re_pattern, path)
+                ts_args = re.findall(r"\$\{(.*?)\}", re_path)
                 url_patterns_dict[inspect.getmodule(url_pattern.url_pattern.callback).__name__ + ":" +
                                   getattr(getattr(url_pattern.url_pattern.callback.cls, func),
                                           "__qualname__")] = (ts_path, ts_method, ts_args)
@@ -206,7 +206,7 @@ def generate_api_client(
                     re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)\/"
                     re_path = re.sub(re_pattern, r"${\1}/", path)
                     re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)\$"
-                    re_path = re.sub(re_pattern, r"${\1}", path)
+                    re_path = re.sub(re_pattern, r"${\1}", re_path)
                     if re_path[0] == "^":
                         re_path = re_path[1:]
                     if re_path[-1] == "$":
@@ -214,7 +214,7 @@ def generate_api_client(
                 quote = '"' if path == re_path else '`'
                 ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
                 ts_method = method.upper()
-                ts_args = re.findall(re_pattern, path)
+                ts_args = re.findall(r"\$\{(.*?)\}", re_path)
                 url_patterns_dict[inspect.getmodule(url_pattern.url_pattern.callback).__name__ + ":" +
                                   getattr(getattr(url_pattern.url_pattern.callback.view_class, method),
                                           "__qualname__")] = (ts_path, ts_method, ts_args)
@@ -230,7 +230,7 @@ def generate_api_client(
                 re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)\/"
                 re_path = re.sub(re_pattern, r"${\1}/", path)
                 re_pattern = r"\(\?P\<([A-Za-z0-9_]+)\>.+?\)\$"
-                re_path = re.sub(re_pattern, r"${\1}", path)
+                re_path = re.sub(re_pattern, r"${\1}", re_path)
                 if re_path[0] == "^":
                     re_path = re_path[1:]
                 if re_path[-1] == "$":
@@ -240,7 +240,7 @@ def generate_api_client(
             ts_method = next(
                 iter([x for x in url_pattern.url_pattern.callback.cls.http_method_names if x != "options"]), "get"
             ).upper()
-            ts_args = re.findall(re_pattern, path)
+            ts_args = re.findall(r"\$\{(.*?)\}", re_path)
             url_patterns_dict[inspect.getmodule(url_pattern.url_pattern.callback).__name__ + ":" +
                               url_pattern.url_pattern.callback.__name__] = (ts_path, ts_method, ts_args)
             url_patterns_dict[str(url_pattern.url_pattern.callback)] = (ts_path, ts_method, ts_args)
