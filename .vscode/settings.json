@@ -16,7 +16,7 @@
         "--disable=abstract-method",
         "--disable=blacklisted-name",
         "--disable=missing-docstring",
-        "--disable=protected-accesss",
+        "--disable=protected-access",
         "--disable=too-few-public-methods",
         "--disable=too-many-arguments"
     ],
