@@ -164,19 +164,22 @@ class TypeScriptInterfaceDefinition:
         if hasattr(field, 'child') and not isinstance(field, serializers.DictField):
             is_many = True
             field_type = type(field.child)
+            effective_field = field.child
         elif hasattr(field, 'child_relation') and not isinstance(field, serializers.DictField):
             is_many = True
             field_type = type(field.child_relation)
+            effective_field = field.child_relation
         else:
             is_many = False
             field_type = type(field)
+            effective_field = field
 
         # get TypeScript type string based on DRF serializer field type
         ts_type = DEFAULT_SERIALIZER_FIELD_MAPPINGS.get(field_type)
         if ts_type is None:
-            if issubclass(field_type, serializers.ChoiceField) and hasattr(field, "choices"):
-                ts_type = " | ".join(
-                    ['"' + choice + '"' for choice in field.choices])
+            if isinstance(effective_field, serializers.ChoiceField) and hasattr(effective_field, "choices"):
+                ts_type = ("(" if is_many else "") + " | ".join(
+                    ['"' + choice + '"' for choice in effective_field.choices]) + (")" if is_many else "")
             else:
                 for key, value in DEFAULT_SERIALIZER_FIELD_MAPPINGS.items():
                     if issubclass(field_type, key):

@@ -1,11 +1,10 @@
-import inspect
 import logging
 from typing import Type, Optional
 
 from rest_framework import serializers
 
 from .exceptions import DRFTypeScriptAPIClientException
-from .helpers import TypeScriptEndpointDefinition, TypeScriptInterfaceDefinition, TypeScriptPropertyDefinition
+from .helpers import TypeScriptEndpointDefinition, TypeScriptInterfaceDefinition
 
 _logger = logging.getLogger(f"drf-typescript-api-client.{__name__}")
 

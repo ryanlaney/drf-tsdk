@@ -32,6 +32,8 @@ class FooSerializer(serializers.Serializer):
     datetime_field = serializers.DateTimeField(allow_null=True, read_only=True)
     list_field_char_child = serializers.ListField(
         child=serializers.CharField())
+    list_field_choice_child = serializers.ListField(
+        child=serializers.ChoiceField(choices=("choiceA", "choiceB", "choiceC")))
     dict_field = serializers.DictField()
     json_field = serializers.JSONField(write_only=True)
     choice_field = serializers.ChoiceField(
