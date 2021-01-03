@@ -4,6 +4,7 @@ from rest_framework.viewsets import ViewSet
 from drf_typescript_api_client import ts_api_endpoint, ts_api_interface
 
 from .common import SuccessSerializer
+from .serializers import MyCustomField
 
 
 @ts_api_interface(name="IFooQuery")
@@ -44,8 +45,9 @@ class FooSerializer(serializers.Serializer):
         child=serializers.IntegerField())
     dict_field_with_serializer_child = serializers.DictField(
         child=InnerFooSerializer())
-    dift_field_with_list_serializer_child = serializers.DictField(
+    dict_field_with_list_serializer_child = serializers.DictField(
         child=InnerFooSerializer(many=True))
+    custom_field = MyCustomField(some_attribute="test string")
 
 
 class FooView(ViewSet):

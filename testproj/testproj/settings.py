@@ -1,6 +1,8 @@
 import os
 import sys
 
+from api.serializers import MyCustomField
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -110,6 +112,14 @@ if not DEBUG:
 
 REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': False,
+}
+
+# drf_typescript_api_client
+
+DRF_TYPESCRIPT_API_CLIENT = {
+    'SERIALIZER_FIELD_MAPPINGS': {
+        MyCustomField: 'string'
+    }
 }
 
 # Logging

@@ -2,12 +2,14 @@ from typing import Optional, Type
 import logging
 import re
 
+from django.conf import settings
+
 from rest_framework import serializers
 
 _logger = logging.getLogger(__name__)
 
 
-DEFAULT_SERIALIZER_FIELD_MAPPINGS = {
+SERIALIZER_FIELD_MAPPINGS = {
     serializers.BooleanField: 'boolean',
     serializers.NullBooleanField: 'boolean | null',
     serializers.CharField: 'string',
@@ -29,6 +31,13 @@ DEFAULT_SERIALIZER_FIELD_MAPPINGS = {
     serializers.HStoreField: 'Map<string, any>',
     serializers.JSONField: 'any'
 }
+
+if hasattr(settings, 'DRF_TYPESCRIPT_API_CLIENT'):
+    SERIALIZER_FIELD_MAPPING_OVERRIDES = settings.DRF_TYPESCRIPT_API_CLIENT.get(
+        "SERIALIZER_FIELD_MAPPINGS")
+    if SERIALIZER_FIELD_MAPPING_OVERRIDES:
+        for k, v in SERIALIZER_FIELD_MAPPING_OVERRIDES.items():
+            SERIALIZER_FIELD_MAPPINGS[k] = v
 
 
 class TypeScriptPropertyDefinition:
@@ -175,13 +184,13 @@ class TypeScriptInterfaceDefinition:
             effective_field = field
 
         # get TypeScript type string based on DRF serializer field type
-        ts_type = DEFAULT_SERIALIZER_FIELD_MAPPINGS.get(field_type)
+        ts_type = SERIALIZER_FIELD_MAPPINGS.get(field_type)
         if ts_type is None:
             if isinstance(effective_field, serializers.ChoiceField) and hasattr(effective_field, "choices"):
                 ts_type = ("(" if is_many else "") + " | ".join(
                     ['"' + choice + '"' for choice in effective_field.choices]) + (")" if is_many else "")
             else:
-                for key, value in DEFAULT_SERIALIZER_FIELD_MAPPINGS.items():
+                for key, value in SERIALIZER_FIELD_MAPPINGS.items():
                     if issubclass(field_type, key):
                         ts_type = value
                         break
