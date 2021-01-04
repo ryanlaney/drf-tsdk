@@ -27,8 +27,8 @@ SERIALIZER_FIELD_MAPPINGS = {
     serializers.DateField: 'string',
     serializers.TimeField: 'string',
     serializers.DurationField: 'string',
-    serializers.DictField: 'Map<string, any>',
-    serializers.HStoreField: 'Map<string, any>',
+    serializers.DictField: '{ [key: string] : any }',
+    serializers.HStoreField: '{ [key: string] : any }',
     serializers.JSONField: 'any'
 }
 
@@ -224,7 +224,7 @@ class TypeScriptInterfaceDefinition:
             else:
                 child_type = self._get_property_definition(
                     name="dummy", field=field.child).ts_type
-            ts_type = f"Map<string, {child_type}>"
+            ts_type = f"{{ [key: string] : {child_type} }}"
 
         return TypeScriptPropertyDefinition(
             name=name,
