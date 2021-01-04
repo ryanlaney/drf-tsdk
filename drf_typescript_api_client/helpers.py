@@ -114,10 +114,17 @@ class TypeScriptInterfaceDefinition:
         property_strings = []
         for property_ in self.properties:
             if isinstance(property_, TypeScriptInterfaceDefinition):
-                if method == "write" and hasattr(property_.serializer, 'read_only') and property_.serializer.read_only:
+
+                is_read_only = hasattr(
+                    property_.serializer, 'read_only') and property_.serializer.read_only
+                if method == "write" and is_read_only:
                     continue
-                if method == "read" and hasattr(property_.serializer, 'write_only') and property_.serializer.write_only:
+
+                is_write_only = hasattr(
+                    property_.serializer, 'write_only') and property_.serializer.write_only
+                if method == "read" and is_write_only:
                     continue
+
                 if property_.serializer.__class__ in DRFSerializerMapper.mappings:
                     ret = ""
                     if hasattr(self.serializer, "help_text") and self.serializer.help_text:
@@ -132,7 +139,7 @@ class TypeScriptInterfaceDefinition:
                     if hasattr(property_.serializer, "help_text") and property_.serializer.help_text:
                         ret = f"/** {property_.serializer.help_text} */\n"
                     not_required = hasattr(
-                        property_.serializer, "required") and property_.serializer.required == False
+                        property_.serializer, "required") and property_.serializer.required == False and not is_read_only
                     ret += property_.name + ("?" if not_required else "") + ": " + property_.ts_definition_string(method=method) + (
                         "[]" if property_.property_definition.is_many else "")
                     property_strings.append(ret)
