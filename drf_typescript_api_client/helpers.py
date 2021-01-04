@@ -131,7 +131,9 @@ class TypeScriptInterfaceDefinition:
                     ret = ""
                     if hasattr(property_.serializer, "help_text") and property_.serializer.help_text:
                         ret = f"/** {property_.serializer.help_text} */\n"
-                    ret += property_.name + ": " + property_.ts_definition_string(method=method) + (
+                    not_required = hasattr(
+                        property_.serializer, "required") and not property_.serializer.required
+                    ret += property_.name + ("?" if not_required else "") + ": " + property_.ts_definition_string(method=method) + (
                         "[]" if property_.property_definition.is_many else "")
                     property_strings.append(ret)
             else:

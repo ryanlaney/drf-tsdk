@@ -40,7 +40,7 @@ class FooSerializer(serializers.Serializer):
     choice_field = serializers.ChoiceField(
         choices=("choice1", "choice2", "choice3"))
     write_only_serializer_field = InnerFooSerializer(write_only=True, many=True,
-                                                     help_text="Description of `write_only_serializer_field`")
+                                                     help_text="Description of `write_only_serializer_field`", required=False)
     read_only_serializer_field = InnerFooSerializer(read_only=True, many=True)
     dict_field_with_integer_child = serializers.DictField(
         child=serializers.IntegerField())
