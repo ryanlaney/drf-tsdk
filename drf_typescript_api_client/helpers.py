@@ -114,6 +114,10 @@ class TypeScriptInterfaceDefinition:
         property_strings = []
         for property_ in self.properties:
             if isinstance(property_, TypeScriptInterfaceDefinition):
+                if method == "write" and hasattr(property_.serializer, 'read_only') and property_.serializer.read_only:
+                    continue
+                if method == "read" and hasattr(property_.serializer, 'write_only') and property_.serializer.write_only:
+                    continue
                 if property_.serializer.__class__ in DRFSerializerMapper.mappings:
                     ret = ""
                     if hasattr(self.serializer, "help_text") and self.serializer.help_text:
