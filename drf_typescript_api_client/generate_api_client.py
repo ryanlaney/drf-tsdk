@@ -1,6 +1,7 @@
 import logging
 import re
 import json
+import os
 import inspect
 from typing import Callable, List, Optional
 
@@ -272,9 +273,18 @@ def generate_api_client(
     #     } for p in url_patterns])
     # return
 
-    _logger.debug("Generating TypeScript API client")
-    with open(output_path, 'w') as output_file:
+    _logger.debug("Getting current TypeScript SDK")
+    mode = "w"
+    if os.path.exists(output_path):
+        mode = "r+"
+    with open(output_path, mode) as output_file:
+        if mode == "r+":
+            current_text = output_file.read()
         api_client_text = _get_api_client(
             api_name=api_name, headers=headers, csrf_token_variable_name=csrf_token_variable_name, post_processor=post_processor, url_patterns=url_patterns_dict)
         prettified = jsbeautifier.beautify(api_client_text)
-        output_file.write(prettified)
+        if mode == "w" or current_text.strip() != prettified.strip():
+            _logger.debug("Changes detected, rebuilding the SDK")
+            output_file.seek(0)
+            output_file.write(prettified)
+            output_file.close()
