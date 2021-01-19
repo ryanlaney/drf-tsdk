@@ -285,6 +285,8 @@ def generate_api_client(
         prettified = jsbeautifier.beautify(api_client_text)
         if mode == "w" or current_text.strip() != prettified.strip():
             _logger.debug("Changes detected, rebuilding the SDK")
-            output_file.seek(0)
+            if mode == "r+":
+                output_file.seek(0)
+                output_file.truncate()
             output_file.write(prettified)
             output_file.close()
