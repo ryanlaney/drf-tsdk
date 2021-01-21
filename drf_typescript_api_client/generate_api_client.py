@@ -98,7 +98,7 @@ def _get_ts_endpoint_text(key, value, headers, csrf_token_variable_name, url_pat
             + ("" if not value.body_serializer else 'body: JSON.stringify(params.data),\n') \
             + "...params.options, \n" \
             + "})\n" \
-            + ".then((response) => response.json())\n" \
+            + ".then((response) => { if (response.ok) { \nreturn response.json(); \n } \n throw new Error(response))\n" \
             + ".then((result: " + ("any" if not value.response_serializer else value.response_serializer.ts_definition_string(method="read")) + ") => params.onSuccess && params.onSuccess(result))\n" \
             + ".catch((error) => params.onError && params.onError(error)); \n" \
             + "}, "
