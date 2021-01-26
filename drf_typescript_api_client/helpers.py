@@ -103,7 +103,7 @@ class TypeScriptInterfaceDefinition:
     def ts_definition_string(self, method: str = "read", is_interface_definition: bool = False) -> str:
         from .drf_to_ts import DRFSerializerMapper
 
-        if method == "read" and not is_interface_definition and self.serializer.__class__ in DRFSerializerMapper.mappings:
+        if method == "read" and not is_interface_definition and self.serializer.__class__ in DRFSerializerMapper.mappings.keys():
             ret = ""
             if hasattr(self.serializer, "help_text") and self.serializer.help_text:
                 ret = f"/** {self.serializer.help_text} */\n"
@@ -125,7 +125,7 @@ class TypeScriptInterfaceDefinition:
                 if method == "read" and is_write_only:
                     continue
 
-                if property_.serializer.__class__ in DRFSerializerMapper.mappings:
+                if property_.serializer.__class__ in DRFSerializerMapper.mappings.keys() and DRFSerializerMapper.mappings[property_.serializer.__class__].method == "read":
                     ret = ""
                     if hasattr(self.serializer, "help_text") and self.serializer.help_text:
                         ret = f"/** {self.serializer.help_text} */\n"
@@ -139,7 +139,7 @@ class TypeScriptInterfaceDefinition:
                     if hasattr(property_.serializer, "help_text") and property_.serializer.help_text:
                         ret = f"/** {property_.serializer.help_text} */\n"
                     not_required = hasattr(
-                        property_.serializer, "required") and property_.serializer.required == False and not is_read_only
+                        property_.serializer, "required") and not property_.serializer.required and not is_read_only
                     ret += property_.name + ("?" if not_required else "") + ": " + property_.ts_definition_string(method=method) + (
                         "[]" if property_.property_definition.is_many else "")
                     property_strings.append(ret)
