@@ -125,7 +125,7 @@ class TypeScriptInterfaceDefinition:
                 if method == "read" and is_write_only:
                     continue
 
-                if property_.serializer.__class__ in DRFSerializerMapper.mappings.keys() and DRFSerializerMapper.mappings[property_.serializer.__class__].method == "read":
+                if property_.serializer.__class__ in DRFSerializerMapper.mappings.keys() and method == "read":
                     ret = ""
                     if hasattr(self.serializer, "help_text") and self.serializer.help_text:
                         ret = f"/** {self.serializer.help_text} */\n"
