@@ -98,10 +98,22 @@ def _get_ts_endpoint_text(key, value, headers, csrf_token_variable_name, url_pat
             + ("" if not value.body_serializer else 'body: JSON.stringify(params.data),\n') \
             + "...params.options, \n" \
             + "})\n" \
-            + ".then((response) => { if (response.ok) { \nreturn response.json(); \n } \n throw new Error(JSON.stringify({\nstatus: response.status, \ncontent: response.text()\n })) })\n" \
-            + ".then((result: " + ("any" if not value.response_serializer else value.response_serializer.ts_definition_string(method="read")) + ") => params.onSuccess && params.onSuccess(result))\n" \
-            + ".catch((error) => params.onError && params.onError(error)); \n" \
-            + "}, "
+            + """.then((response) => {
+                if (response.ok) {
+                    return response.json()
+                        .then((result: IEventSeries) => params.onSuccess && params.onSuccess(result))
+                        .catch((error) => params.onError && params.onError(error))
+                }
+                return response.text()
+                    .then((result) => params.onError && params.onError({
+                        response: response,
+                        status: response.status,
+                        statusText: response.statusText,
+                        message: result
+                    }))
+                    .catch((error) => params.onError && params.onError(error))
+                })
+            },"""
     return text
 
 
