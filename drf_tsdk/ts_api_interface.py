@@ -5,7 +5,7 @@ from typing import Optional
 
 from .drf_to_ts import DRFSerializerMapper
 
-_logger = logging.getLogger(f"drf-typescript-api-client.{__name__}")
+_logger = logging.getLogger(f"drf-tsdk.{__name__}")
 
 
 def ts_api_interface(name: Optional[str] = None, should_export: bool = True, method: str = "read"):

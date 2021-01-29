@@ -14,11 +14,11 @@ from .exceptions import DRFTypeScriptAPIClientException
 from .drf_to_ts import DRFViewMapper, DRFSerializerMapper
 from .url_resolver import resolve_urls
 
-_logger = logging.getLogger(f"drf-typescript-api-client.{__name__}")
+_logger = logging.getLogger(f"drf-tsdk.{__name__}")
 
 
 def _default_processor(content):
-    return "/** This file was generated automatically by drf-typescript-api-client. */" + "\n\n" + content
+    return "/** This file was generated automatically by drf-tsdk. */" + "\n\n" + content
 
 
 def _get_ts_interface_text(value) -> str:
@@ -117,7 +117,7 @@ def _get_ts_endpoint_text(key, value, headers, csrf_token_variable_name, url_pat
     return text
 
 
-def _get_api_client(api_name: str, headers: dict, csrf_token_variable_name: Optional[str], post_processor: Callable[[str], str], url_patterns: List[URLPattern]) -> str:
+def _get_typescript_bindings(api_name: str, headers: dict, csrf_token_variable_name: Optional[str], post_processor: Callable[[str], str], url_patterns: List[URLPattern]) -> str:
     """
     Generates the TypeScript API Client documentation text.
     """
@@ -156,7 +156,7 @@ def _get_api_client(api_name: str, headers: dict, csrf_token_variable_name: Opti
     return content
 
 
-def generate_api_client(
+def generate_typescript_bindings(
     output_path: str, api_name: str = "API", headers: dict = {}, csrf_token_variable_name: Optional[str] = None, post_processor: Optional[Callable[[str], str]] = _default_processor, urlpatterns=None
 ) -> None:
     """Generates the TypeScript API Client .ts file
@@ -169,7 +169,7 @@ def generate_api_client(
 
     Ex:
     comment='// this is a comment'
-    generate_api_client(output_path='/path/to/api.ts', api_name='MyAPIClass',
+    generate_typescript_bindings(output_path='/path/to/api.ts', api_name='MyAPIClass',
                         post_processor=lambda docs: comment + '\\n\\n' + docs)
     """
     assert urlpatterns is not None, "urlpatterns must be specified"
@@ -292,9 +292,9 @@ def generate_api_client(
     with open(output_path, mode) as output_file:
         if mode == "r+":
             current_text = output_file.read()
-        api_client_text = _get_api_client(
+        typescript_bindings_text = _get_typescript_bindings(
             api_name=api_name, headers=headers, csrf_token_variable_name=csrf_token_variable_name, post_processor=post_processor, url_patterns=url_patterns_dict)
-        prettified = jsbeautifier.beautify(api_client_text)
+        prettified = jsbeautifier.beautify(typescript_bindings_text)
         if mode == "w" or current_text.strip() != prettified.strip():
             _logger.debug("Changes detected, rebuilding the SDK")
             if mode == "r+":

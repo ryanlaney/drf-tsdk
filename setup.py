@@ -4,9 +4,9 @@ with open('README.md') as file:
     long_description = file.read()
 
 setuptools.setup(
-    name="drf-typescript-api-client",
+    name="drf-tsdk",
     version="0.1.0",
-    url="https://github.com/ryan.laney/drf-typescript-api-client",
+    url="https://github.com/ryan.laney/drf-tsdk",
 
     author="Ryan Laney",
     author_email="ryanlaney@gmail.com",
@@ -17,7 +17,7 @@ setuptools.setup(
     keywords=['Django', 'Django Rest Framework',
               'DRF', 'Typescript', 'Python', 'API'],
 
-    packages=['drf_typescript_api_client'],
+    packages=['drf_tsdk'],
     include_package_data=True,
     zip_safe=False,
     platforms='any',

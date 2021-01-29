@@ -7,9 +7,9 @@ from rest_framework import serializers
 
 from .exceptions import DRFTypeScriptAPIClientException
 from .drf_to_ts import DRFViewMapper
-from .url_resolver  import resolve_urls
+from .url_resolver import resolve_urls
 
-_logger = logging.getLogger(f"drf-typescript-api-client.{__name__}")
+_logger = logging.getLogger(f"drf-tsdk.{__name__}")
 
 
 def ts_api_endpoint(
@@ -26,7 +26,7 @@ def ts_api_endpoint(
     dynamically-generated TypeScript file with the approprate TypeScript type interfaces.
 
     @ts_api_interface(path=("foo", "list"), response=FooSerializer)
-    @api_client(['GET'])
+    @api_view(['GET'])
     def foo(request):
         pass
     """

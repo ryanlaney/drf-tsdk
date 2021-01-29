@@ -6,7 +6,7 @@ from rest_framework import serializers
 from .exceptions import DRFTypeScriptAPIClientException
 from .helpers import TypeScriptEndpointDefinition, TypeScriptInterfaceDefinition
 
-_logger = logging.getLogger(f"drf-typescript-api-client.{__name__}")
+_logger = logging.getLogger(f"drf-tsdk.{__name__}")
 
 
 class DRFViewMapper:
