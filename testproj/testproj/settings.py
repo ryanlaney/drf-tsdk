@@ -114,9 +114,9 @@ REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': False,
 }
 
-# drf_typescript_api_client
+# drf_tsdk
 
-DRF_TYPESCRIPT_API_CLIENT = {
+DRF_TSDK = {
     'SERIALIZER_FIELD_MAPPINGS': {
         MyCustomField: 'string'
     }

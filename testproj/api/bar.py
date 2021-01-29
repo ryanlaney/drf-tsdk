@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.decorators import api_view
 
-from drf_typescript_api_client import ts_api_endpoint, ts_api_interface
+from drf_tsdk import ts_api_endpoint, ts_api_interface
 
 
 @ts_api_interface(should_export=False)
