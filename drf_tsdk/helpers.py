@@ -201,7 +201,7 @@ class TypeScriptInterfaceDefinition:
         if ts_type is None:
             if isinstance(effective_field, serializers.ChoiceField) and hasattr(effective_field, "choices"):
                 ts_type = ("(" if is_many else "") + " | ".join(
-                    [(('"' + choice + '"') if isinstance(choice, str) else choice) for choice in effective_field.choices]) + (")" if is_many else "")
+                    [(('"' + choice + '"') if isinstance(choice, str) else str(choice)) for choice in effective_field.choices]) + (")" if is_many else "")
             else:
                 for key, value in SERIALIZER_FIELD_MAPPINGS.items():
                     if issubclass(field_type, key):
