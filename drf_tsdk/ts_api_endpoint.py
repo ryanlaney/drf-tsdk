@@ -33,7 +33,7 @@ def ts_api_endpoint(
     if not isinstance(path, list) and not isinstance(path, tuple) and not isinstance(path, str):
         raise TypeError("`path` must be a list, tuple, or string.")
     if isinstance(path, str):
-        if not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", path):
+        if not re.search(r"^[A-Za-z_][A-Za-z0-9_]*$", path):
             raise ValueError(
                 "If `path` is a string, it must begin with a letter and consist of only alphanumeric characters.")
     else:
@@ -44,7 +44,7 @@ def ts_api_endpoint(
             if not isinstance(elem, str):
                 raise TypeError(
                     "If `path` is a list or tuple, each item must be a string.")
-            if not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", elem):
+            if not re.search(r"^[A-Za-z_][A-Za-z0-9_]*$", elem):
                 raise ValueError(
                     "If `path` is a list or tuple, each item must be a string beginning with a letter and consisting of only alphanumeric characters.")
 

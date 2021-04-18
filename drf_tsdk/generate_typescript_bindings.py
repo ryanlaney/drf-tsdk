@@ -121,10 +121,10 @@ def _get_typescript_bindings(api_name: str, headers: dict, csrf_token_variable_n
     """
     Generates the TypeScript API Client documentation text.
     """
-    if re.match(r"[^0-9A-Za-z_]", api_name):
+    if re.search(r"[^0-9A-Za-z_]", api_name):
         raise DRFTypeScriptAPIClientException(
             "`class_name` may only contain alphanumeric characters,")
-    if re.match(r"[0-9]", api_name[0]):
+    if re.search(r"[0-9]", api_name[0]):
         raise DRFTypeScriptAPIClientException(
             "`class_name` must not begin with a number.")
 

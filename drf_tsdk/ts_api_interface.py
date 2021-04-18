@@ -18,7 +18,7 @@ def ts_api_interface(name: Optional[str] = None, should_export: bool = True, met
     """
     if name is not None and not isinstance(name, str):
         raise TypeError("`name` must be a string or None.")
-    if name is not None and not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", name):
+    if name is not None and not re.search(r"^[A-Za-z_][A-Za-z0-9_]*$", name):
         raise ValueError(
             "`name` must start with a letter and contain only alphanumeric characters.")
     if not isinstance(should_export, bool):

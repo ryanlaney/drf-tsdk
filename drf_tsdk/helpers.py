@@ -53,7 +53,7 @@ class TypeScriptPropertyDefinition:
 
     def _format_name(self) -> str:
         """Adds quotes arount a string if it contains non-alphanumeric characters"""
-        if re.match(r"[^0-9A-Za-z_]", self.name):
+        if re.search(r"[^0-9A-Za-z_]", self.name):
             return f'"{self.name}"'
         return self.name
 
