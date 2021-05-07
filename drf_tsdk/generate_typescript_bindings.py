@@ -171,7 +171,7 @@ def _get_ts_endpoint_text(
                 if (response.ok) {
                     return response.json()
                         .then((result) => {
-                            if (params.shouldUpdateCache){ params.cache["""
+                            if (params.shouldUpdateCache){ cache["""
             + url
             + """] = result }; params.onSuccess && params.onSuccess(result)
             })
