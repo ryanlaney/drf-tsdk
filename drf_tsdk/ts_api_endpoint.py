@@ -20,7 +20,7 @@ def ts_api_endpoint(
     description: Optional[str] = None,
     query_serializer: Optional[Type[serializers.Serializer]] = None,
     body_serializer: Optional[Type[serializers.Serializer]] = None,
-    response_serializer: Optional[Type[serializers.Serializer]] = None
+    response_serializer: Optional[Type[serializers.Serializer]] = None,
 ):
     """Any Django Rest Framework view with this decorator will be added to a
     dynamically-generated TypeScript file with the approprate TypeScript type interfaces.
@@ -30,62 +30,79 @@ def ts_api_endpoint(
     def foo(request):
         pass
     """
-    if not isinstance(path, list) and not isinstance(path, tuple) and not isinstance(path, str):
+    if (
+        not isinstance(path, list)
+        and not isinstance(path, tuple)
+        and not isinstance(path, str)
+    ):
         raise TypeError("`path` must be a list, tuple, or string.")
     if isinstance(path, str):
         if not re.search(r"^[A-Za-z_][A-Za-z0-9_]*$", path):
             raise ValueError(
-                "If `path` is a string, it must begin with a letter and consist of only alphanumeric characters.")
+                "If `path` is a string, it must begin with a letter and consist of only alphanumeric characters."
+            )
     else:
         if len(path) == 0:
             raise ValueError(
-                "If `path` is a list or tuple, it must have at least one component.")
+                "If `path` is a list or tuple, it must have at least one component."
+            )
         for elem in path:
             if not isinstance(elem, str):
                 raise TypeError(
-                    "If `path` is a list or tuple, each item must be a string.")
+                    "If `path` is a list or tuple, each item must be a string."
+                )
             if not re.search(r"^[A-Za-z_][A-Za-z0-9_]*$", elem):
                 raise ValueError(
-                    "If `path` is a list or tuple, each item must be a string beginning with a letter and consisting of only alphanumeric characters.")
+                    "If `path` is a list or tuple, each item must be a string beginning with a letter and consisting of only alphanumeric characters."
+                )
 
     if not isinstance(method, str):
         raise TypeError("`method` must be a string.")
     allowed_methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
     if method not in allowed_methods + [x.lower() for x in allowed_methods]:
-        raise ValueError("`method` must be one of %s" %
-                         ", ".join(allowed_methods))
+        raise ValueError("`method` must be one of %s" % ", ".join(allowed_methods))
 
-    if query_serializer is not None \
-            and not isinstance(query_serializer, serializers.Serializer) \
-            and not isinstance(query_serializer, serializers.ListSerializer) \
-            and not issubclass(query_serializer, serializers.Serializer):
+    if (
+        query_serializer is not None
+        and not isinstance(query_serializer, serializers.Serializer)
+        and not isinstance(query_serializer, serializers.ListSerializer)
+        and not issubclass(query_serializer, serializers.Serializer)
+    ):
         raise ValueError(
-            "`query_serializer` must be a Serializer or ListSerializer instance, a Serializer subclass, or None.")
-    if body_serializer is not None \
-            and not isinstance(body_serializer, serializers.Serializer) \
-            and not isinstance(body_serializer, serializers.ListSerializer) \
-            and not issubclass(body_serializer, serializers.Serializer):
+            "`query_serializer` must be a Serializer or ListSerializer instance, a Serializer subclass, or None."
+        )
+    if (
+        body_serializer is not None
+        and not isinstance(body_serializer, serializers.Serializer)
+        and not isinstance(body_serializer, serializers.ListSerializer)
+        and not issubclass(body_serializer, serializers.Serializer)
+    ):
         raise ValueError(
-            "`query_serializer` must be a Serializer or ListSerializer instance, a Serializer subclass, or None.")
-    if response_serializer is not None \
-            and not isinstance(response_serializer, serializers.Serializer) \
-            and not isinstance(response_serializer, serializers.ListSerializer) \
-            and not issubclass(response_serializer, serializers.Serializer):
+            "`query_serializer` must be a Serializer or ListSerializer instance, a Serializer subclass, or None."
+        )
+    if (
+        response_serializer is not None
+        and not isinstance(response_serializer, serializers.Serializer)
+        and not isinstance(response_serializer, serializers.ListSerializer)
+        and not issubclass(response_serializer, serializers.Serializer)
+    ):
         raise ValueError(
-            "`query_serializer` must be a Serializer or ListSerializer instance, a Serializer subclass, or None.")
+            "`query_serializer` must be a Serializer or ListSerializer instance, a Serializer subclass, or None."
+        )
 
     def decorator(view):
         _logger.debug("Updating mapping for %s", view)
         if len(path) == 0:
             raise DRFTypeScriptAPIClientException(
-                "`path` must have at least one component")
+                "`path` must have at least one component"
+            )
         mapper = DRFViewMapper(
             path=path,
             view=view,
             description=description,
             query_serializer=query_serializer,
             body_serializer=body_serializer,
-            response_serializer=response_serializer
+            response_serializer=response_serializer,
         )
         mapper.update_mappings()
         return view

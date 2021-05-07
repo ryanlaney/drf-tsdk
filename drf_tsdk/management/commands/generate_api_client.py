@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 
+
 class Command(BaseCommand):
-    help = 'Generates TypeScript API bindings in the specified file'
+    help = "Generates TypeScript API bindings in the specified file"
 
     def add_arguments(self, parser):
         # TODO: implement this

@@ -1,57 +1,67 @@
-import logging
-import re
-import json
-import os
 import inspect
+import json
+import logging
+import os
+import re
 from typing import Callable, List, Optional
 
 from django.urls import URLPattern
-from rest_framework.views import APIView
 
 import jsbeautifier
+from rest_framework.views import APIView
 
+from .drf_to_ts import DRFSerializerMapper, DRFViewMapper
 from .exceptions import DRFTypeScriptAPIClientException
-from .drf_to_ts import DRFViewMapper, DRFSerializerMapper
 from .url_resolver import resolve_urls
 
 _logger = logging.getLogger(f"drf-tsdk.{__name__}")
 
 
 def _default_processor(content):
-    return "/** This file was generated automatically by drf-tsdk. */" + "\n\n" + content
+    return (
+        "/** This file was generated automatically by drf-tsdk. */" + "\n\n" + content
+    )
 
 
 def _get_ts_interface_text(value) -> str:
-    text = f"{'export ' if value.should_export else ''} interface {value.name} " + \
-        value.ts_definition_string(
-            is_interface_definition=True, method=value.method)
+    text = (
+        f"{'export ' if value.should_export else ''} interface {value.name} "
+        + value.ts_definition_string(is_interface_definition=True, method=value.method)
+    )
     return text
 
 
 def _get_headers(headers, csrf_token_variable_name) -> str:
     ret = {}
-    ret['Content-Type'] = "application/json"
+    ret["Content-Type"] = "application/json"
     for key, value in headers.items():
         ret[key] = value
     ret_stringified = json.dumps(ret)
     if csrf_token_variable_name is not None:
-        ret_stringified = '{"X-CSRFToken": ' + csrf_token_variable_name + \
-            ", " + ret_stringified.split("{")[1]
+        ret_stringified = (
+            '{"X-CSRFToken": '
+            + csrf_token_variable_name
+            + ", "
+            + ret_stringified.split("{")[1]
+        )
     return ret_stringified
+
 
 # TODO: this is pretty hacky, and probably doesn't work in certain cases, esp. with regex. Need to refactor this.
 
 
 def _get_url(value, url_patterns) -> (str, str, List[str]):
-    """ Returns URL and method of the endpoint """
+    """Returns URL and method of the endpoint"""
 
-    url_pattern = url_patterns.get(inspect.getmodule(
-        value.view).__name__ + ":" + value.view.__qualname__)
+    url_pattern = url_patterns.get(
+        inspect.getmodule(value.view).__name__ + ":" + value.view.__qualname__
+    )
     if url_pattern:
         return url_pattern
 
-    url_pattern = url_patterns.get(inspect.getmodule(
-        value.view).__name__ + ":" + value.view.__name__)
+    url_pattern = url_patterns.get(
+        inspect.getmodule(value.view).__name__ + ":" + value.view.__name__
+    )
     if url_pattern:
         return url_pattern
 
@@ -61,10 +71,13 @@ def _get_url(value, url_patterns) -> (str, str, List[str]):
             return url_pattern
 
     raise DRFTypeScriptAPIClientException(
-        f"No pattern found for View {str(value.view)} {str(value.view.__name__)}")
+        f"No pattern found for View {str(value.view)} {str(value.view.__name__)}"
+    )
 
 
-def _get_ts_endpoint_text(key, value, headers, csrf_token_variable_name, url_patterns) -> str:
+def _get_ts_endpoint_text(
+    key, value, headers, csrf_token_variable_name, url_patterns
+) -> str:
     text = ""
     if not isinstance(value, dict) and value.description:
         text += "/** " + value.description.replace("\n", "\n * ") + " */\n"
@@ -73,35 +86,95 @@ def _get_ts_endpoint_text(key, value, headers, csrf_token_variable_name, url_pat
         text += " {"
         for _key, _value in value.items():
             text += "\n"
-            text += _get_ts_endpoint_text(_key, _value,
-                                          headers, csrf_token_variable_name, url_patterns)
+            text += _get_ts_endpoint_text(
+                _key, _value, headers, csrf_token_variable_name, url_patterns
+            )
         text += "\n" + "},"
     else:
         # print(_get_url(value, url_patterns))
         url, method, args = _get_url(value, url_patterns)
-        text += " (\n" \
-            + (",\n").join([f"{arg}: string" for arg in args]) \
-            + ((",\n") if len(args) > 0 else "") \
-            + "params: {\n" \
-            + ("" if not value.query_serializer else "query?: " + value.query_serializer.ts_definition_string(method="read") + ",\n") \
-            + ("" if not value.body_serializer else "data?: " + value.body_serializer.ts_definition_string(method="write") + ",\n") \
-            + "options?: RequestInit,\n" \
-            + "onSuccess?(result: " \
-            + ("any" if not value.response_serializer else value.response_serializer.ts_definition_string(method="read")) \
-            + "): void,\n" \
-            + "onError?(error: any): void\n" \
-            + "},\n" \
-            + ") : Promise<Response> => {\n" \
-            + 'return fetch(' + url + ("" if not value.query_serializer else (" + (params.query && Object.keys(params.query).length > 0 ? (\"?\" + new URLSearchParams(params.query).toString()) : \"\")")) + ', {\n' \
-            + 'method: "' + method + '",\n' \
-            + 'headers: ' + _get_headers(headers, csrf_token_variable_name) + ',\n' \
-            + ("" if not value.body_serializer else 'body: JSON.stringify(params.data),\n') \
-            + "...params.options, \n" \
-            + "})\n" \
+        text += (
+            " (\n"
+            + (",\n").join([f"{arg}: string" for arg in args])
+            + ((",\n") if len(args) > 0 else "")
+            + "params: {\n"
+            + (
+                ""
+                if not value.query_serializer
+                else "query?: "
+                + value.query_serializer.ts_definition_string(method="read")
+                + ",\n"
+            )
+            + (
+                ""
+                if not value.body_serializer
+                else "data?: "
+                + value.body_serializer.ts_definition_string(method="write")
+                + ",\n"
+            )
+            + "options?: RequestInit,\n"
+            + "onSuccess?(result: "
+            + (
+                "any"
+                if not value.response_serializer
+                else value.response_serializer.ts_definition_string(method="read")
+            )
+            + "): void,\n"
+            + "onError?(error: any): void,\n"
+            + (
+                (
+                    "shouldUseCache?: boolean = false,\n"
+                    + "shouldUpdateCache?: boolean = false\n"
+                )
+                if method.lower().strip() == "get"
+                else ""
+            )
+            + "},\n"
+            + ") : Promise<Response> "
+            + ("?" if method.lower().strip() == "get" else "")
+            + " => {\n"
+            + (
+                (
+                    "if (params.shouldUseCache && cache["
+                    + url
+                    + "]) { params.onSuccess && params.onSuccess(cache["
+                    + url
+                    + "]) } else {"
+                )
+                if method.lower().strip() == "get"
+                else ""
+            )
+            + "return fetch("
+            + url
+            + (
+                ""
+                if not value.query_serializer
+                else (
+                    ' + (params.query && Object.keys(params.query).length > 0 ? ("?" + new URLSearchParams(params.query).toString()) : "")'
+                )
+            )
+            + ", {\n"
+            + 'method: "'
+            + method
+            + '",\n'
+            + "headers: "
+            + _get_headers(headers, csrf_token_variable_name)
+            + ",\n"
+            + (
+                ""
+                if not value.body_serializer
+                else "body: JSON.stringify(params.data),\n"
+            )
+            + "...params.options, \n"
+            + "})\n"
             + """.then((response) => {
                 if (response.ok) {
                     return response.json()
-                        .then((result: IEventSeries) => params.onSuccess && params.onSuccess(result))
+                        .then((result) => {
+                            if (params.shouldUpdateCache){ params.cache["""
+            + url
+            + """] = result }; params.onSuccess && params.onSuccess(result)
+            })
                         .catch((error) => params.onError && params.onError(error))
                 }
                 return response.text()
@@ -113,22 +186,35 @@ def _get_ts_endpoint_text(key, value, headers, csrf_token_variable_name, url_pat
                     }))
                     .catch((error) => params.onError && params.onError(error))
                 })
-            },"""
+            }"""
+            + ("}," if method.lower().strip() == "get" else ",")
+        )
     return text
 
 
-def _get_typescript_bindings(api_name: str, headers: dict, csrf_token_variable_name: Optional[str], post_processor: Callable[[str], str], url_patterns: List[URLPattern]) -> str:
+def _get_typescript_bindings(
+    api_name: str,
+    headers: dict,
+    csrf_token_variable_name: Optional[str],
+    post_processor: Callable[[str], str],
+    url_patterns: List[URLPattern],
+) -> str:
     """
     Generates the TypeScript API Client documentation text.
     """
     if re.search(r"[^0-9A-Za-z_]", api_name):
         raise DRFTypeScriptAPIClientException(
-            "`class_name` may only contain alphanumeric characters,")
+            "`class_name` may only contain alphanumeric characters,"
+        )
     if re.search(r"[0-9]", api_name[0]):
         raise DRFTypeScriptAPIClientException(
-            "`class_name` must not begin with a number.")
+            "`class_name` must not begin with a number."
+        )
 
     content = ""
+
+    # cache
+    content += "const cache = {};\n\n"
 
     # interfaces
     sep = ""
@@ -145,8 +231,9 @@ def _get_typescript_bindings(api_name: str, headers: dict, csrf_token_variable_n
     sep = ""
     for key, value in DRFViewMapper.mappings.items():
         content += sep
-        content += _get_ts_endpoint_text(key, value,
-                                         headers, csrf_token_variable_name, url_patterns)
+        content += _get_ts_endpoint_text(
+            key, value, headers, csrf_token_variable_name, url_patterns
+        )
         sep = "\n"
 
     content += f"\n}};\n\nexport default {api_name};\n"
@@ -157,7 +244,12 @@ def _get_typescript_bindings(api_name: str, headers: dict, csrf_token_variable_n
 
 
 def generate_typescript_bindings(
-    output_path: str, api_name: str = "API", headers: dict = {}, csrf_token_variable_name: Optional[str] = None, post_processor: Optional[Callable[[str], str]] = _default_processor, urlpatterns=None
+    output_path: str,
+    api_name: str = "API",
+    headers: dict = {},
+    csrf_token_variable_name: Optional[str] = None,
+    post_processor: Optional[Callable[[str], str]] = _default_processor,
+    urlpatterns=None,
 ) -> None:
     """Generates the TypeScript API Client .ts file
 
@@ -186,7 +278,9 @@ def generate_typescript_bindings(
     url_patterns_dict = {}
     for url_pattern in url_patterns:
         # ViewSets
-        if hasattr(url_pattern.url_pattern.callback, 'actions') and isinstance(url_pattern.url_pattern.callback.actions, dict):
+        if hasattr(url_pattern.url_pattern.callback, "actions") and isinstance(
+            url_pattern.url_pattern.callback.actions, dict
+        ):
             for method, func in url_pattern.url_pattern.callback.actions.items():
                 # print(getattr(url_pattern.url_pattern.callback.cls, "__name__"), value.view.__qualname__)
                 if hasattr(url_pattern.url_pattern.pattern, "_route"):
@@ -203,19 +297,32 @@ def generate_typescript_bindings(
                         re_path = re_path[1:]
                     if re_path[-1] == "$":
                         re_path = re_path[:-1]
-                quote = '"' if path == re_path else '`'
-                ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
+                quote = '"' if path == re_path else "`"
+                ts_path = f"{quote}/{str(url_pattern.base_url)}{re_path}{quote}"
                 ts_method = method.upper()
                 ts_args = re.findall(r"\$\{(.*?)\}", re_path)
-                url_patterns_dict[inspect.getmodule(url_pattern.url_pattern.callback).__name__ + ":" +
-                                  getattr(getattr(url_pattern.url_pattern.callback.cls, func),
-                                          "__qualname__")] = (ts_path, ts_method, ts_args)
+                url_patterns_dict[
+                    inspect.getmodule(url_pattern.url_pattern.callback).__name__
+                    + ":"
+                    + getattr(
+                        getattr(url_pattern.url_pattern.callback.cls, func),
+                        "__qualname__",
+                    )
+                ] = (ts_path, ts_method, ts_args)
                 url_patterns_dict[str(url_pattern.url_pattern.callback)] = (
-                    ts_path, ts_method, ts_args)
+                    ts_path,
+                    ts_method,
+                    ts_args,
+                )
         # APIViews
-        elif hasattr(url_pattern.url_pattern.callback, 'view_class') and 'WrappedAPIView' not in str(url_pattern.url_pattern.callback):
+        elif hasattr(
+            url_pattern.url_pattern.callback, "view_class"
+        ) and "WrappedAPIView" not in str(url_pattern.url_pattern.callback):
             actions = {
-                k: v for k, v in url_pattern.url_pattern.callback.view_class.__dict__.items() if callable(v)}
+                k: v
+                for k, v in url_pattern.url_pattern.callback.view_class.__dict__.items()
+                if callable(v)
+            }
             for method, func in actions.items():
                 if hasattr(url_pattern.url_pattern.pattern, "_route"):
                     path = str(url_pattern.url_pattern.pattern._route)
@@ -231,15 +338,23 @@ def generate_typescript_bindings(
                         re_path = re_path[1:]
                     if re_path[-1] == "$":
                         re_path = re_path[:-1]
-                quote = '"' if path == re_path else '`'
-                ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
+                quote = '"' if path == re_path else "`"
+                ts_path = f"{quote}/{str(url_pattern.base_url)}{re_path}{quote}"
                 ts_method = method.upper()
                 ts_args = re.findall(r"\$\{(.*?)\}", re_path)
-                url_patterns_dict[inspect.getmodule(url_pattern.url_pattern.callback).__name__ + ":" +
-                                  getattr(getattr(url_pattern.url_pattern.callback.view_class, method),
-                                          "__qualname__")] = (ts_path, ts_method, ts_args)
+                url_patterns_dict[
+                    inspect.getmodule(url_pattern.url_pattern.callback).__name__
+                    + ":"
+                    + getattr(
+                        getattr(url_pattern.url_pattern.callback.view_class, method),
+                        "__qualname__",
+                    )
+                ] = (ts_path, ts_method, ts_args)
                 url_patterns_dict[str(url_pattern.url_pattern.callback)] = (
-                    ts_path, ts_method, ts_args)
+                    ts_path,
+                    ts_method,
+                    ts_args,
+                )
         # @api_views
         elif hasattr(url_pattern.url_pattern.callback, "cls"):
             if hasattr(url_pattern.url_pattern.pattern, "_route"):
@@ -256,17 +371,29 @@ def generate_typescript_bindings(
                     re_path = re_path[1:]
                 if re_path[-1] == "$":
                     re_path = re_path[:-1]
-            quote = '"' if path == re_path else '`'
-            ts_path = f'{quote}/{str(url_pattern.base_url)}{re_path}{quote}'
+            quote = '"' if path == re_path else "`"
+            ts_path = f"{quote}/{str(url_pattern.base_url)}{re_path}{quote}"
             ts_method = next(
                 iter(
-                    [x for x in url_pattern.url_pattern.callback.cls.http_method_names if x != "options"]), "get"
+                    [
+                        x
+                        for x in url_pattern.url_pattern.callback.cls.http_method_names
+                        if x != "options"
+                    ]
+                ),
+                "get",
             ).upper()
             ts_args = re.findall(r"\$\{(.*?)\}", re_path)
-            url_patterns_dict[inspect.getmodule(url_pattern.url_pattern.callback).__name__ + ":" +
-                              url_pattern.url_pattern.callback.__name__] = (ts_path, ts_method, ts_args)
+            url_patterns_dict[
+                inspect.getmodule(url_pattern.url_pattern.callback).__name__
+                + ":"
+                + url_pattern.url_pattern.callback.__name__
+            ] = (ts_path, ts_method, ts_args)
             url_patterns_dict[str(url_pattern.url_pattern.callback)] = (
-                ts_path, ts_method, ts_args)
+                ts_path,
+                ts_method,
+                ts_args,
+            )
 
     # print(url_patterns_dict)
     # return
@@ -293,7 +420,12 @@ def generate_typescript_bindings(
         if mode == "r+":
             current_text = output_file.read()
         typescript_bindings_text = _get_typescript_bindings(
-            api_name=api_name, headers=headers, csrf_token_variable_name=csrf_token_variable_name, post_processor=post_processor, url_patterns=url_patterns_dict)
+            api_name=api_name,
+            headers=headers,
+            csrf_token_variable_name=csrf_token_variable_name,
+            post_processor=post_processor,
+            url_patterns=url_patterns_dict,
+        )
         prettified = jsbeautifier.beautify(typescript_bindings_text)
         if mode == "w" or current_text.strip() != prettified.strip():
             _logger.debug("Changes detected, rebuilding the SDK")

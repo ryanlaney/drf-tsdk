@@ -8,5 +8,9 @@ from .generate_typescript_bindings import generate_typescript_bindings
 _logger = logging.getLogger(f"drf-tsdk.{__name__}")
 
 
-__all__ = ["generate_typescript_bindings", "ts_api_endpoint", "ts_api_interface",
-           "DRFTypeScriptAPIClientException"]
+__all__ = [
+    "generate_typescript_bindings",
+    "ts_api_endpoint",
+    "ts_api_interface",
+    "DRFTypeScriptAPIClientException",
+]
