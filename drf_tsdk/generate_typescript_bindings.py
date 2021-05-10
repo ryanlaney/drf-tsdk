@@ -113,6 +113,7 @@ def _get_ts_endpoint_text(
                 + ",\n"
             )
             + "options?: RequestInit,\n"
+            + "/** Called when the request returns a successful response */\n"
             + "onSuccess?(result: "
             + (
                 "any"
@@ -120,10 +121,13 @@ def _get_ts_endpoint_text(
                 else value.response_serializer.ts_definition_string(method="read")
             )
             + "): void,\n"
+            + "/** Called when the request errors out */\n"
             + "onError?(error: any): void,\n"
             + (
                 (
-                    "shouldUseCache?: boolean = false,\n"
+                    "/** If `true`, uses data that was cached previously when this request returned a successful response. */\n"
+                    + "shouldUseCache?: boolean = false,\n"
+                    + "/** If `true`, caches the returned data if the request is successful. */\n"
                     + "shouldUpdateCache?: boolean = false\n"
                 )
                 if method.lower().strip() == "get"
