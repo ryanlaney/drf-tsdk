@@ -48,6 +48,8 @@ generate_typescript_bindings('/path/to/apiclient.ts')
 _/path/to/apiclient.ts_
 
 ```typescript
+const cache = {};
+
 export interface ISomeSerializer {
     foo: string,
     bar: number | null,
@@ -59,9 +61,14 @@ const API {
         params: {
             options ? : any,
             onSuccess ? (result: ISomeSerializer[]) : void,
-            onError ? (error: any) : void
+            onError ? (error: any) : void,
+            shouldUseCache ? : boolean = false,
+            shouldUpdateCache ? : boolean = false
         },
-    ): Promise < Response > => {
+    ): Promise < Response > ? => {
+        if (params.shouldUseCache && cache["/api/v1/fields"]) {
+            params.onSuccess && params.onSuccess(cache["/api/v1/fields"])
+        } else {
             return fetch("/api/v1/myy_endpoint_name", {
                 method: "GET",
                 ...params.options,
@@ -69,6 +76,7 @@ const API {
             .then((response) => response.json())
             .then((result: ISomeSerializer[]) => params.onSuccess & params.onSuccess(result))
             .catch((error) => params.onError & params.onError(error));
+        }
     }
 }
 
@@ -77,13 +85,10 @@ export default API;
 
 # TODO
 
-- [ ] Add support for FilterInspectors and Paginators
+- [ ] Add support for DRF FilterInspectors and Paginators
 - [ ] Throw an error if two Interfaces are generated with the same name
 - [ ] Throw an error if two endpoints have the same path
 - [ ] Refactor... especially *generate_typescript_bindings.py*
-- [ ] Automatically resolve endpoint URL if possible (i.e. using Django `reverse`)
-- [ ] Automatically resolve endpoint type (_GET_, _POST_, etc) if possible (i.e. also using Django `reverse` and inspecting the view decorators)
-- [ ] Add support for `serializer_class` in ViewSets, overridable by `response_serializer`. Investigate how this is handled by DRF e.g. when generating Swagger docs and mimic this behavior.
 
 # Current Limitations
 
