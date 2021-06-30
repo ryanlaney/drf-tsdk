@@ -1,21 +1,17 @@
 import logging
 import re
-
-from typing import Any, List, Optional, Type
+from typing import List, Optional, Type
 
 from rest_framework import serializers
 
-from .exceptions import DRFTypeScriptAPIClientException
 from .drf_to_ts import DRFViewMapper
-from .url_resolver import resolve_urls
+from .exceptions import DRFTypeScriptAPIClientException
 
 _logger = logging.getLogger(f"drf-tsdk.{__name__}")
 
 
 def ts_api_endpoint(
     path: List[str],
-    urlconf: Any = None,
-    url: Optional[str] = None,
     method: str = "GET",
     description: Optional[str] = None,
     query_serializer: Optional[Type[serializers.Serializer]] = None,

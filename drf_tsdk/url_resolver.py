@@ -1,5 +1,3 @@
-import json
-
 from django.urls import URLPattern, URLResolver
 
 from .exceptions import DRFTypeScriptAPIClientException
@@ -27,16 +25,3 @@ def resolve_urls(urlpatterns):
         return all_patterns
 
     return list_urls(urlpatterns)
-    # for p in patterns:
-    #     print({
-    #         'pattern': {
-    #             'route': p.pattern._route,
-    #             'regex_dict': p.pattern._regex_dict,
-    #             'is_endpoint': p.pattern._is_endpoint,
-    #             'name': p.pattern.name,
-    #             'converters': p.pattern.converters
-    #         },
-    #         'callback': p.callback,
-    #         'default_args': p.default_args,
-    #         'name': p.name
-    #     })

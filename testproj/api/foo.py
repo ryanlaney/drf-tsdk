@@ -19,6 +19,7 @@ class InnerFooSerializer(serializers.Serializer):
     y1 = serializers.CharField()
     y2 = serializers.DateTimeField()
     y3 = serializers.UUIDField(allow_null=True, help_text="Description of `y3`")
+    y4 = serializers.ListField(child=serializers.CharField())
 
 
 @ts_api_interface(name="IFoo")
@@ -42,7 +43,9 @@ class FooSerializer(serializers.Serializer):
         many=True,
         help_text="Description of `write_only_serializer_field`",
     )
-    read_only_serializer_field = InnerFooSerializer(read_only=True, many=True)
+    read_only_serializer_field = InnerFooSerializer(
+        read_only=True, many=True, allow_null=True
+    )
     dict_field_with_integer_child = serializers.DictField(
         child=serializers.IntegerField()
     )

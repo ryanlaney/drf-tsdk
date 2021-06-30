@@ -1,6 +1,6 @@
-from typing import Optional, Type
 import logging
 import re
+from typing import Optional, Type
 
 from django.conf import settings
 
@@ -213,6 +213,11 @@ class TypeScriptInterfaceDefinition:
                         + ": "
                         + property_.ts_definition_string(method=method)
                         + ("[]" if property_.property_definition.is_many else "")
+                        + (
+                            " | null"
+                            if property_.property_definition.is_nullable
+                            else ""
+                        )
                     )
                     property_strings.append(ret)
             else:
