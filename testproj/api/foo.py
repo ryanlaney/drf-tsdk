@@ -37,7 +37,9 @@ class FooSerializer(serializers.Serializer):
     )
     dict_field = serializers.DictField()
     json_field = serializers.JSONField(write_only=True)
-    choice_field = serializers.ChoiceField(choices=("choice1", "choice2", "choice3"))
+    choice_field = serializers.ChoiceField(
+        choices=("choice1", "choice2", "choice3", 'choice"4')
+    )
     write_only_serializer_field = InnerFooSerializer(
         write_only=True,
         many=True,

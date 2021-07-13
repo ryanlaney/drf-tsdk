@@ -304,7 +304,7 @@ class TypeScriptInterfaceDefinition:
                     + " | ".join(
                         [
                             (
-                                ('"' + choice + '"')
+                                ('"' + choice.replace('"','\\"') + '"')
                                 if isinstance(choice, str)
                                 else str(choice)
                             )
