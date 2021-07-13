@@ -65,7 +65,7 @@ class TypeScriptPropertyDefinition:
     def _format_name(self) -> str:
         """Adds quotes arount a string if it contains non-alphanumeric characters"""
         if re.search(r"[^0-9A-Za-z_]", self.name):
-            return f'"{self.name}"'
+            return '"%s"' % self.name.replace('"', '\\"')
         return self.name
 
     def ts_definition_string(self, method: str = "read") -> Optional[str]:
@@ -129,6 +129,8 @@ class TypeScriptInterfaceDefinition:
         self.property_definition = property_definition
         self.serializer = serializer_
         self.name = name or serializer_.__class__.__name__
+        if re.search(r"[^0-9A-Za-z_]", self.name):
+            self.name = '"%s"' % self.name.replace('"', '\\"')
         self.should_export = should_export
         self.properties = self._get_interface_definition()
         self.method = method
@@ -304,7 +306,7 @@ class TypeScriptInterfaceDefinition:
                     + " | ".join(
                         [
                             (
-                                ('"' + choice.replace('"','\\"') + '"')
+                                ('"' + choice.replace('"', '\\"') + '"')
                                 if isinstance(choice, str)
                                 else str(choice)
                             )
