@@ -137,27 +137,17 @@ def _get_ts_endpoint_text(
             + ") : Promise<Response> "
             + ("?" if method.lower().strip() == "get" else "")
             + " => {\n"
+            + "const requestPath = "
+            + url
+            + ' + (params.query ? ("?" + new URLSearchParams(params.query).toString()) : "");'
             + (
                 (
-                    "if (params.shouldUseCache && cache["
-                    + url
-                    + "]) { params.onSuccess && params.onSuccess(cache["
-                    + url
-                    + "]) } else {"
+                    "if (params.shouldUseCache && cache[requestPath]) { params.onSuccess && params.onSuccess(cache[requestPath]) } else {"
                 )
                 if method.lower().strip() == "get"
                 else ""
             )
-            + "return fetch("
-            + url
-            + (
-                ""
-                if not value.query_serializer
-                else (
-                    ' + (params.query && Object.keys(params.query).length > 0 ? ("?" + new URLSearchParams(params.query).toString()) : "")'
-                )
-            )
-            + ", {\n"
+            + "return fetch(requestPath, {\n"
             + 'method: "'
             + method
             + '",\n'
@@ -175,9 +165,7 @@ def _get_ts_endpoint_text(
                 if (response.ok) {
                     return response.json()
                         .then((result) => {
-                            if (params.shouldUpdateCache){ cache["""
-            + url
-            + """] = result }; params.onSuccess && params.onSuccess(result)
+                            if (params.shouldUpdateCache){ cache[requestPath] = result }; params.onSuccess && params.onSuccess(result)
             })
                         .catch((error) => params.onError && params.onError(error))
                 }
