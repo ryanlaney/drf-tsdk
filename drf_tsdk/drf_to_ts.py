@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 from typing import List, Optional, Type
 
@@ -13,7 +11,7 @@ _logger = logging.getLogger(f"drf-tsdk.{__name__}")
 
 class DRFViewMapper:
 
-    mappers: List[DRFViewMapper] = []
+    mappers: "List[DRFViewMapper]" = []
 
     mappings = (
         dict()
@@ -75,7 +73,7 @@ class DRFViewMapper:
 
 class DRFSerializerMapper:
 
-    mappers: List[DRFSerializerMapper] = []
+    mappers: "List[DRFSerializerMapper]" = []
 
     mappings = (
         dict()
