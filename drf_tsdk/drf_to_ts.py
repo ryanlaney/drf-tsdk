@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import logging
-from typing import Type, Optional
+from typing import List, Optional, Type
 
 from rest_framework import serializers
 
@@ -10,6 +12,8 @@ _logger = logging.getLogger(f"drf-tsdk.{__name__}")
 
 
 class DRFViewMapper:
+
+    mappers: List[DRFViewMapper] = []
 
     mappings = (
         dict()
@@ -30,6 +34,8 @@ class DRFViewMapper:
         self.query_serializer = query_serializer
         self.body_serializer = body_serializer
         self.response_serializer = response_serializer
+
+        DRFViewMapper.mappers.append(self)
 
     def _update_mappings_for_path(self, path, mappings_for_path):
         if path[0] not in DRFViewMapper.mappings:
@@ -69,6 +75,8 @@ class DRFViewMapper:
 
 class DRFSerializerMapper:
 
+    mappers: List[DRFSerializerMapper] = []
+
     mappings = (
         dict()
     )  # a mapping of DRF serializers to typescript API interfaces, represented by TypeScriptInterfaceDefinition instances
@@ -84,6 +92,8 @@ class DRFSerializerMapper:
         self.name = name
         self.should_export = should_export
         self.method = method
+
+        DRFSerializerMapper.mappers.append(self)
 
     def _update_mappings(self):
         definition = TypeScriptInterfaceDefinition(

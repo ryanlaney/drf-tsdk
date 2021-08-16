@@ -92,7 +92,7 @@ def ts_api_endpoint(
             raise DRFTypeScriptAPIClientException(
                 "`path` must have at least one component"
             )
-        mapper = DRFViewMapper(
+        DRFViewMapper(
             path=path,
             view=view,
             description=description,
@@ -100,7 +100,7 @@ def ts_api_endpoint(
             body_serializer=body_serializer,
             response_serializer=response_serializer,
         )
-        mapper.update_mappings()
+        # mapper.update_mappings()
         return view
 
     return decorator

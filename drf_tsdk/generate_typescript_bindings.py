@@ -265,6 +265,12 @@ def generate_typescript_bindings(
     if post_processor is not None and not callable(post_processor):
         raise TypeError("`post_processor` must be a Callable or None")
 
+    for view_mapper in DRFViewMapper.mappers:
+        view_mapper.update_mappings()
+
+    for serializer_mapper in DRFSerializerMapper.mappers:
+        serializer_mapper.update_mappings()
+
     # TODO: very hacky
     url_patterns = resolve_urls(urlpatterns)
     url_patterns_dict = {}

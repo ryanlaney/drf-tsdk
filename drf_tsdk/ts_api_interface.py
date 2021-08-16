@@ -29,10 +29,9 @@ def ts_api_interface(
 
     def decorator(class_):
         _logger.debug("Getting interface for %s", class_)
-        mapper = DRFSerializerMapper(
+        DRFSerializerMapper(
             serializer=class_, name=name, should_export=should_export, method=method
         )
-        mapper.update_mappings()
         return class_
 
     return decorator
