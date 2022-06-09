@@ -8,10 +8,10 @@ url = "https://github.com/ryan.laney/drf-tsdk"
 author = "Ryan Laney"
 author_email = "ryanlaney@gmail.com"
 
-with open("README.md", "utf8") as readme:
+with open("README.md", "utf-8") as readme:
     long_description = readme.read()
 
-with open("requirements.txt", "utf8") as fh:
+with open("requirements.txt", "utf-8") as fh:
     requirements = [
         r.strip() for r in fh.read().split("\n") if not r.strip().startswith("#")
     ]
