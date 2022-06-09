@@ -1,6 +1,7 @@
 # drf-tsdk
 
 testproj/output/*
+.DS_STORE
 
 # Standard Github Python .gitignore: https://github.com/github/gitignore/blob/master/Python.gitignore
 

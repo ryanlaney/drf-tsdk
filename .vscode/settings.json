@@ -1,17 +1,17 @@
 {
-    "python.pythonPath": "venv/bin/python3.8",
-
+    "python.pythonPath": "venv/bin/python3.6",
     "python.formatting.provider": "black",
     "python.formatting.blackPath": "venv/bin/black",
-
     "python.linting.enabled": true,
     "python.linting.lintOnSave": true,
     "python.linting.pylintEnabled": true,
     "python.linting.pylintPath": "venv/bin/pylint",
     "python.linting.pylintUseMinimalCheckers": false,
     "python.linting.pylintArgs": [
-        "--load-plugins", "pylint_django",
-        "--init-hook", "import sys; sys.path.append('.')",
+        "--load-plugins",
+        "pylint_django",
+        "--init-hook",
+        "import sys; sys.path.append('.')",
         "--variable-rgx=[a-z_]+",
         "--disable=abstract-method",
         "--disable=blacklisted-name",
@@ -20,11 +20,9 @@
         "--disable=too-few-public-methods",
         "--disable=too-many-arguments"
     ],
-
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true,
     },
-
     "files.trimTrailingWhitespace": true,
     "files.trimFinalNewlines": true,
     "files.insertFinalNewline": true,
