@@ -1,7 +1,3 @@
-black
 django>=2.2
 djangorestframework
 jsbeautifier
-pre-commit
-pylint
-pylint-django

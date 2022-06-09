@@ -1,0 +1,26 @@
+[MASTER]
+argument-rgx=[a-z0-9_]+
+attr-rgx=[a-z0-9_]+
+disable=abstract-method,
+      anomalous-backslash-in-string,
+      imported-auth-user,
+      inconsistent-return-statements,
+      missing-docstring,
+      no-self-use,
+      protected-access,
+      too-many-ancestors,
+      too-many-arguments,
+      too-many-boolean-expressions,
+      too-many-instance-attributes,
+      too-many-locals,
+      too-many-public-methods,
+      too-many-return-statements,
+      too-many-statements,
+      unsubscriptable-object
+django-settings-module=testproj.settings
+ignore=migrations
+init-hook="import sys; sys.path.append('.')"
+load-plugins=pylint_django
+max-line-length=79
+module-rgx=([0-9a-z]+_?)*[0-9a-z]+
+variable-rgx=[a-z0-9_]+

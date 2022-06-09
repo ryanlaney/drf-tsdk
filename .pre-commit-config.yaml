@@ -1,6 +1,36 @@
 repos:
--   repo: https://github.com/ambv/black
-    rev: 19.3b0
+  - repo: https://github.com/ambv/black
+    rev: 22.3.0
     hooks:
-    - id: black
-      language_version: python3.6
+      - id: black
+        language_version: python3.6
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        name: isort (python)
+      - id: isort
+        name: isort (cython)
+        types: [cython]
+      - id: isort
+        name: isort (pyi)
+        types: [pyi]
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]
+        require_serial: true
+        args:
+          - -d broad-except
+          - -d duplicate-code
+          - -d fixme
+          - -d line-too-long
+          - -d redefined-builtin
+          - -d too-few-public-methods
+          - -d too-many-branches
+          - -d too-many-lines
+          - -d too-many-nested-blocks
+          - -d unused-argument
