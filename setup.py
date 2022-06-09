@@ -1,12 +1,12 @@
 from setuptools import setup
 
-name = "drf-tsdk"
-package = "drf_tsdk"
-version = "0.1.0"
-description = "A package to generate a TypeScript API client for Django Rest Framework views and viewsets."
-url = "https://github.com/ryan.laney/drf-tsdk"
-author = "Ryan Laney"
-author_email = "ryanlaney@gmail.com"
+NAME = "drf-tsdk"
+PACKAGE = "drf_tsdk"
+VERSION = "0.1.0"
+DESCRIPTION = "A package to generate a TypeScript API client for Django Rest Framework views and viewsets."
+URL = "https://github.com/ryan.laney/drf-tsdk"
+AUTHOR = "Ryan Laney"
+AUTHOR_EMAIL = "ryanlaney@gmail.com"
 
 with open("README.md", encoding="utf-8") as readme:
     long_description = readme.read()
@@ -17,19 +17,19 @@ with open("requirements.txt", encoding="utf-8") as fh:
     ]
 
 setup(
-    name=name,
-    version=version,
-    url=url,
-    author=author,
-    author_email=author_email,
-    description=description,
+    name=NAME,
+    version=VERSION,
+    url=URL,
+    author=AUTHOR,
+    author_email=AUTHOR_EMAIL,
+    description=DESCRIPTION,
     long_description=long_description,
     long_description_content_type="text/markdown",
     keywords=["Django", "Django Rest Framework", "DRF", "Typescript", "Python", "API"],
-    packages=[package],
+    packages=[PACKAGE],
     include_package_data=True,
     zip_safe=False,
     platforms="any",
-    python_requies=">=3.6",
+    python_requires=">=3.6",
     install_requires=requirements,
 )

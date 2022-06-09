@@ -24,6 +24,7 @@ repos:
         types: [python]
         require_serial: true
         args:
+          - --rcfile=testproj/.pylintrc
           - -d broad-except
           - -d duplicate-code
           - -d fixme
