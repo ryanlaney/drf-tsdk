@@ -1,5 +1,5 @@
 black
-django==2.2
+django>=2.2
 djangorestframework
 jsbeautifier
 pre-commit
