@@ -17,8 +17,6 @@ disable=abstract-method,
       too-many-return-statements,
       too-many-statements,
       unsubscriptable-object
-# django-settings-module=testproj.settings
-# load-plugins=pylint_django
 max-line-length=79
 module-rgx=([0-9a-z]+_?)*[0-9a-z]+
 variable-rgx=[a-z0-9_]+
