@@ -11,7 +11,6 @@ _logger = logging.getLogger(__name__)
 
 SERIALIZER_FIELD_MAPPINGS = {
     serializers.BooleanField: "boolean",
-    serializers.NullBooleanField: "boolean | null",
     serializers.CharField: "string",
     serializers.EmailField: "string",
     serializers.RegexField: "string",
@@ -155,7 +154,6 @@ class TypeScriptInterfaceDefinition:
         property_strings = []
         for property_ in self.properties:
             if isinstance(property_, TypeScriptInterfaceDefinition):
-
                 is_read_only = (
                     hasattr(property_.serializer, "read_only")
                     and property_.serializer.read_only
