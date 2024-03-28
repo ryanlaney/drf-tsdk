@@ -3,12 +3,11 @@ import json
 import logging
 import os
 import re
-from typing import Callable, List, Optional
+from typing import Any, Callable, List, Optional
 
 from django.urls import URLPattern
 
 import jsbeautifier
-from rest_framework.views import APIView
 
 from .drf_to_ts import DRFSerializerMapper, DRFViewMapper
 from .exceptions import DRFTypeScriptAPIClientException
@@ -50,7 +49,7 @@ def _get_headers(headers, csrf_token_variable_name) -> str:
 # TODO: this is pretty hacky, and probably doesn't work in certain cases, esp. with regex. Need to refactor this.
 
 
-def _get_url(value, url_patterns) -> (str, str, List[str]):
+def _get_url(value, url_patterns: dict) -> (str, str, List[str], Any):
     """Returns URL and method of the endpoint"""
 
     url_pattern = url_patterns.get(
@@ -70,8 +69,22 @@ def _get_url(value, url_patterns) -> (str, str, List[str]):
         if url_pattern:
             return url_pattern
 
+    url_pattern = next(
+        iter(
+            [
+                x
+                for x in url_patterns.values()
+                if x[3].__module__ == value.view.__module__
+                and x[3].cls.__name__ == value.view.cls.__name__
+            ]
+        ),
+        None,
+    )
+    if url_pattern:
+        return url_pattern
+
     raise DRFTypeScriptAPIClientException(
-        f"No pattern found for View {str(value.view)} {str(value.view.__name__)}"
+        f"No pattern found for View {str(value.view)} {str(value.view.__name__)} in module {str(value.view.__module__)} line {value.view.__code__.co_firstlineno}"
     )
 
 
@@ -92,7 +105,7 @@ def _get_ts_endpoint_text(
         text += "\n" + "},"
     else:
         # print(_get_url(value, url_patterns))
-        url, method, args = _get_url(value, url_patterns)
+        url, method, args, _ = _get_url(value, url_patterns)
         text += (
             " (\n"
             + (",\n").join([f"{arg}: string" for arg in args])
@@ -306,11 +319,12 @@ def generate_typescript_bindings(
                         getattr(url_pattern.url_pattern.callback.cls, func),
                         "__qualname__",
                     )
-                ] = (ts_path, ts_method, ts_args)
+                ] = (ts_path, ts_method, ts_args, url_pattern.url_pattern.callback)
                 url_patterns_dict[str(url_pattern.url_pattern.callback)] = (
                     ts_path,
                     ts_method,
                     ts_args,
+                    url_pattern.url_pattern.callback,
                 )
         # APIViews
         elif hasattr(
@@ -347,11 +361,12 @@ def generate_typescript_bindings(
                         getattr(url_pattern.url_pattern.callback.view_class, method),
                         "__qualname__",
                     )
-                ] = (ts_path, ts_method, ts_args)
+                ] = (ts_path, ts_method, ts_args, url_pattern.url_pattern.callback)
                 url_patterns_dict[str(url_pattern.url_pattern.callback)] = (
                     ts_path,
                     ts_method,
                     ts_args,
+                    url_pattern.url_pattern.callback,
                 )
         # @api_views
         elif hasattr(url_pattern.url_pattern.callback, "cls"):
@@ -386,11 +401,12 @@ def generate_typescript_bindings(
                 inspect.getmodule(url_pattern.url_pattern.callback).__name__
                 + ":"
                 + url_pattern.url_pattern.callback.__name__
-            ] = (ts_path, ts_method, ts_args)
+            ] = (ts_path, ts_method, ts_args, url_pattern.url_pattern.callback)
             url_patterns_dict[str(url_pattern.url_pattern.callback)] = (
                 ts_path,
                 ts_method,
                 ts_args,
+                url_pattern.url_pattern.callback,
             )
 
     # print(url_patterns_dict)
