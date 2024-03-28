@@ -1,3 +1,7 @@
+**This package is now deprecated.**
+
+There are a number of actively maintained and more full-featured packages capable of generating TypeScript clients from an OpenAPI spec, such as [orval](https://github.com/anymaniax/orval) or [openapi-typescript-codegen](https://github.com/ferdikoomen/openapi-typescript-codegen). You can use something like [drf-spectacular](https://github.com/tfranzel/drf-spectacular) to generate Swagger documentation, then one of these packages to build the TypeScript client.
+
 # drf-tsdk
 
 _A package to generate a TypeScript API client for [Django Rest Framework](https://www.django-rest-framework.org/) views and viewsets._
