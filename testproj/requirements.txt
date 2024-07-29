@@ -1,4 +1,4 @@
 django
 djangorestframework
-jsbeautifier
+# jsbeautifier
 -e ..

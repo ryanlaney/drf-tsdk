@@ -7,11 +7,12 @@ from typing import Any, Callable, List, Optional
 
 from django.urls import URLPattern
 
-import jsbeautifier
-
 from .drf_to_ts import DRFSerializerMapper, DRFViewMapper
 from .exceptions import DRFTypeScriptAPIClientException
 from .url_resolver import resolve_urls
+
+# import jsbeautifier
+
 
 _logger = logging.getLogger(f"drf-tsdk.{__name__}")
 
@@ -440,7 +441,9 @@ def generate_typescript_bindings(
             post_processor=post_processor,
             url_patterns=url_patterns_dict,
         )
-        prettified = jsbeautifier.beautify(typescript_bindings_text)
+        prettified = (
+            typescript_bindings_text  # jsbeautifier.beautify(typescript_bindings_text)
+        )
         if mode == "w" or current_text.strip() != prettified.strip():
             _logger.debug("Changes detected, rebuilding the SDK")
             if mode == "r+":
