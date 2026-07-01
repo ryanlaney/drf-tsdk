@@ -330,7 +330,9 @@ def generate_typescript_bindings(
         # APIViews
         elif hasattr(
             url_pattern.url_pattern.callback, "view_class"
-        ) and "WrappedAPIView" not in str(url_pattern.url_pattern.callback):
+        ) and getattr(
+            url_pattern.url_pattern.callback.view_class, "__qualname__", ""
+        ) != "WrappedAPIView":
             actions = {
                 k: v
                 for k, v in url_pattern.url_pattern.callback.view_class.__dict__.items()
