@@ -65,8 +65,10 @@ def _get_url(value, url_patterns: dict) -> (str, str, List[str], Any):
     if url_pattern:
         return url_pattern
 
-    if hasattr(str(value.view), "cls"):
-        url_pattern = url_patterns.get(str(value.view.cls))
+    if hasattr(value.view, "cls"):
+        url_pattern = url_patterns.get(
+            inspect.getmodule(value.view).__name__ + ":" + value.view.cls.__name__
+        )
         if url_pattern:
             return url_pattern
 
