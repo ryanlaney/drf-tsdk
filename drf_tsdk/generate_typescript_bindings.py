@@ -405,7 +405,7 @@ def generate_typescript_bindings(
             url_patterns_dict[
                 inspect.getmodule(url_pattern.url_pattern.callback).__name__
                 + ":"
-                + url_pattern.url_pattern.callback.__name__
+                + url_pattern.url_pattern.callback.cls.__name__
             ] = (ts_path, ts_method, ts_args, url_pattern.url_pattern.callback)
             url_patterns_dict[str(url_pattern.url_pattern.callback)] = (
                 ts_path,
